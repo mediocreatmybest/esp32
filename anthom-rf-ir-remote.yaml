@@ -1,0 +1,184 @@
+# Based on https://github.com/athom-tech/esp32-configs/blob/main/athom-rf-ir-remote.yaml
+# Climate At Home Template
+substitutions:
+  # Base Device Info
+  name: "Athom"
+  friendly_name: "Athom RF IR Remote"
+  room: ""
+  device_description: "Climate at Home, Athom esp32 RF433 IR Remote"
+  
+  # Project Info
+  project_name: "Climate at Home. Built on Athom RF IR Remote"
+  project_version: "v0.0.1"
+  
+  # Logging
+  log_level: "INFO"
+  
+  # Add Template Climate Overrides
+  ac_platform: "mitsubishi"
+  enable_heat: "false"
+  enable_fan_only: "true"
+
+  # GPIO Definitions
+  RF_RX_PIN: GPIO19
+  RF_TX_PIN: GPIO18
+  IR_RX_PIN: GPIO33
+  IR_TX_PIN: GPIO25
+  Button_PIN: GPIO0
+  LED_PIN: GPIO27
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: ${device_description}
+  area: ${room}
+  name_add_mac_suffix: true
+  min_version: 2026.5.1
+  project:
+    name: ${project_name}
+    version: ${project_version}
+  platformio_options:
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32dev
+  variant: esp32
+  flash_size: 8MB
+  framework:
+    type: esp-idf
+    version: recommended
+    sdkconfig_options:
+      # should this be removed, need to test BLE proxy      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "10"      
+    advanced: 
+      minimum_chip_revision: "3.1"
+      sram1_as_iram: true
+
+preferences:
+  flash_write_interval: 1min
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+    id: ota_update
+
+logger:
+  level: ${log_level}
+
+mdns:
+  disabled: false
+
+remote_receiver:
+  - pin:
+      number: ${IR_RX_PIN}
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    # Remove in future after testing.
+    dump: all
+    tolerance: 55%
+    id: ir_receiver
+    
+remote_transmitter:
+  - pin:
+      number: ${IR_TX_PIN}
+      inverted: false
+    carrier_duty_percent: 50%
+    non_blocking: true
+    id: ir_transmitter
+
+climate:
+  - platform: ${ac_platform}
+    id: primary_ac
+    transmitter_id: ir_transmitter
+    receiver_id: ir_receiver
+    name: "${name}-AC"
+    supports_heat: ${enable_heat}
+    # Device specific move to main yaml.
+    # supports_fan_only: ${enable_fan_only}
+    icon: "mdi:air-conditioner"
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    id: system_status
+    entity_category: "diagnostic"
+
+  - platform: gpio
+    pin:
+      number: ${Button_PIN}
+      mode:
+        input: true
+      inverted: true
+    name: "Button"
+    id: hardware_button
+    disabled_by_default: true
+    on_multi_click:
+      - timing:
+          - ON for at least 4s
+        then:
+          - button.press: factory_reset_btn
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: diagnostic
+    icon: "mdi:wifi-strength-1"
+
+# Simplistic Percentage 
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    id: wifi_signal_percent
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: diagnostic
+    icon: "mdi:wifi-strength-1"
+
+button:
+  - platform: restart
+    name: "Restart"
+    id: restart_btn
+    entity_category: config
+    icon: "mdi:power-cycle"
+    
+  - platform: factory_reset
+    name: "Factory Reset"
+    id: factory_reset_btn
+    entity_category: config
+
+  - platform: safe_mode
+    name: "Safe Mode"
+    id: safe_mode_btn
+    internal: false
+    entity_category: config
+
+# Should I just disable or remove this.
+light:
+  - platform: status_led
+    name: "Status LED"
+    id: status_led
+    disabled_by_default: true
+    pin: ${LED_PIN}
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      id: ip_address
+      entity_category: diagnostic
+    ssid:
+      name: "Connected SSID"
+      id: ssid
+      entity_category: diagnostic
+    mac_address:
+      name: "Mac Address"
+      id: mac_address
+      entity_category: diagnostic
+      icon: "mdi:check-network"
