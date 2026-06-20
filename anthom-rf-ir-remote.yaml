@@ -1,5 +1,9 @@
 # Based on https://github.com/athom-tech/esp32-configs/blob/main/athom-rf-ir-remote.yaml
+
+#===========================================
 # Climate At Home Template
+#===========================================
+
 substitutions:
   # Base Device Info
   name: "Athom"
@@ -48,17 +52,16 @@ esp32:
     type: esp-idf
     version: recommended
     sdkconfig_options:
-      # should this be removed, need to test BLE proxy      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
+      # Should this be removed, need to test BLE proxy
+      # CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
       CONFIG_ESP_TASK_WDT_TIMEOUT_S: "10"      
+    # Hardware specific options available for anthom-rf-ir-remote device.
     advanced: 
       minimum_chip_revision: "3.1"
       sram1_as_iram: true
 
 preferences:
   flash_write_interval: 1min
-
-api:
-  reboot_timeout: 0s
 
 ota:
   - platform: esphome
@@ -70,6 +73,24 @@ logger:
 mdns:
   disabled: false
 
+#===========================================
+# Climate Definitions - Base settings.
+#===========================================
+climate:
+  - platform: ${ac_platform}
+    id: primary_ac
+    transmitter_id: ir_transmitter
+    receiver_id: ir_receiver
+    # TODO: Add in more dynamic naming based on substitutions for friendly_name and device type. AC, Heater, Fan, etc.
+    name: "${name}-AC"
+    supports_heat: ${enable_heat}
+    supports_fan_only: ${enable_fan_only}
+    icon: "mdi:air-conditioner"
+
+#===========================================
+# Hardware Definitions and Sensors
+#===========================================
+
 remote_receiver:
   - pin:
       number: ${IR_RX_PIN}
@@ -77,7 +98,7 @@ remote_receiver:
       mode:
         input: true
         pullup: true
-    # Remove in future after testing.
+    # Remove dump all in future after testing.
     dump: all
     tolerance: 55%
     id: ir_receiver
@@ -89,17 +110,6 @@ remote_transmitter:
     carrier_duty_percent: 50%
     non_blocking: true
     id: ir_transmitter
-
-climate:
-  - platform: ${ac_platform}
-    id: primary_ac
-    transmitter_id: ir_transmitter
-    receiver_id: ir_receiver
-    name: "${name}-AC"
-    supports_heat: ${enable_heat}
-    # Device specific move to main yaml.
-    # supports_fan_only: ${enable_fan_only}
-    icon: "mdi:air-conditioner"
 
 binary_sensor:
   - platform: status
@@ -130,7 +140,7 @@ sensor:
     entity_category: diagnostic
     icon: "mdi:wifi-strength-1"
 
-# Simplistic Percentage 
+  # Simplistic Percentage conversion, TODO: should be looked at in future.
   - platform: copy
     source_id: wifi_signal_db
     name: "WiFi Signal Percent"
@@ -140,6 +150,8 @@ sensor:
     unit_of_measurement: "%"
     entity_category: diagnostic
     icon: "mdi:wifi-strength-1"
+
+# Physical button on device for restart and resets.
 
 button:
   - platform: restart
@@ -159,13 +171,19 @@ button:
     internal: false
     entity_category: config
 
-# Should I just disable or remove this.
-light:
-  - platform: status_led
-    name: "Status LED"
-    id: status_led
-    disabled_by_default: true
+# Controllable LED, can be used later internally for status.
+# TODO: Add logic to control this based on AC status.
+output: 
+  - platform: gpio
     pin: ${LED_PIN}
+    id: led_status_output
+    
+light:
+  - platform: binary
+    name: "Status LED"
+    id: athom_status_led
+    output: led_status_output
+    disabled_by_default: true
 
 text_sensor:
   - platform: wifi_info
