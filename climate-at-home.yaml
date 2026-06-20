@@ -1,0 +1,42 @@
+substitutions:
+  #  Device Info for overrides.
+  name: "living-room-ac"
+  friendly_name: "Living Room AC Remote"
+  room: "Living Room"
+  
+  # Set climate defaults and model
+  # https://esphome.io/components/climate/
+  ac_platform: "mitsubishi"
+  enable_heat: "false"
+  enable_fan_only: "true"
+
+  # WiFi Settings
+  wifi_fast_connect: "false"
+
+packages:
+  # Download hardware specific template from GitHub.
+  remote_base:
+    url: github://mediocreatmybest/esp32
+    ref: main
+    file: anthom-rf-ir-remote.yaml
+    # We can check updates to the template or remove to keep it totally offline
+    refresh: 1d
+
+# WiFi configuration
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: "${wifi_fast_connect}"
+
+# Some settings are device specific for configurations. eg. Mitsubishi
+climate:
+  # We need to reference the ID 'primary_ac' from the base template for these overrides
+  - id: primary_ac
+    set_fan_mode: quiet_4levels
+
+api:
+  # we can enable api encryption.
+  # https://esphome.io/components/api/
+  #encryption:
+     #key:
+  reboot_timeout: 0s
