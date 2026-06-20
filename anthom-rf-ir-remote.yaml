@@ -86,6 +86,17 @@ climate:
     supports_heat: ${enable_heat}
     supports_fan_only: ${enable_fan_only}
     icon: "mdi:air-conditioner"
+    # Set additional conditions for specific modes or switches.
+    on_state:
+      # Running Mould Reduction sequence when AC is turn off if switch is enabled. 
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return id(switch_anti_mould).state;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            - script.execute: dry_down_sequence
 
 #===========================================
 # Hardware Definitions and Sensors
