@@ -13,7 +13,7 @@ substitutions:
   
   # Project Info
   project_name: "Climate at Home. Built on Athom RF IR Remote"
-  project_version: "v0.0.1"
+  project_version: "v0.0.3"
   
   # Logging
   log_level: "INFO"
@@ -86,6 +86,17 @@ climate:
     supports_heat: ${enable_heat}
     supports_fan_only: ${enable_fan_only}
     icon: "mdi:air-conditioner"
+    # Set additional conditions for specific modes or switches.
+    on_state:
+      # Running Mould Reduction sequence when AC is turn off if switch is enabled. 
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return id(switch_anti_mould).state;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            - script.execute: dry_down_sequence
 
 #===========================================
 # Hardware Definitions and Sensors
@@ -200,3 +211,117 @@ text_sensor:
       id: mac_address
       entity_category: diagnostic
       icon: "mdi:check-network"
+
+
+#===========================================================
+# Switches for user control of features and logic.
+#===========================================================
+
+switch:
+  - platform: template
+    name: "Mould Reduction Dry Down"
+    id: switch_anti_mould
+    icon: "mdi:weather-windy"
+    entity_category: "config"
+    optimistic: true
+
+#===========================================================
+# Global Variables and Settings for inbuilt logic.
+#===========================================================
+
+globals:
+  # we need to track if this is an internal action or external user action. 
+  - id: internal_action
+    type: bool
+    initial_value: 'false'
+  # Mould reduction action flag
+  - id: is_drying_down
+    type: bool
+    initial_value: 'false'
+
+
+#===========================================================
+# Home Assistant Number Sliders for User UI Settings.
+#===========================================================
+# Mould reduction duration sliders. Duration and delay before being triggered.
+number:
+  - platform: template
+    name: "Mould Reduction Duration"
+    id: dry_down_duration
+    icon: "mdi:timer-outline"
+    entity_category: "config"
+    unit_of_measurement: "min"
+    min_value: 5
+    max_value: 30
+    step: 5
+    initial_value: 10
+    optimistic: true
+    restore_value: true
+
+  - platform: template
+    name: "Mould Reduction Wait Delay"
+    id: dry_down_delay
+    icon: "mdi:timer-sand"
+    entity_category: "config"
+    unit_of_measurement: "s"
+    min_value: 0
+    max_value: 90
+    step: 5
+    initial_value: 30
+    optimistic: true
+    restore_value: true
+
+#===========================================================
+# Scripts and Behaviour Logic.
+#===========================================================
+
+# Mould Reduction script, to dry out ac unit when turned off.
+script:
+  - id: dry_down_sequence
+    mode: restart
+    then:
+      - globals.set:
+          id: is_drying_down
+          value: 'true'
+      # User set delay, set by number slider in haos.    
+      - delay: !lambda 'return id(dry_down_delay).state * 1000;'
+      # Check if the AC is still off, if so, switch to fan mode. If not, exit and reset drying down flag.
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            # Raise our flag, change to FAN, lower flag
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: "FAN_ONLY"
+            - delay: 500ms # We should buffer for state update between mode changes
+            - globals.set:
+                id: internal_action
+                value: 'false'
+            
+            - delay: !lambda 'return id(dry_down_duration).state * 60000;'
+            
+            # Raise our flag, turn OFF, lower flag
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: "OFF"
+            - delay: 500ms # We should buffer for state update between mode changes
+            - globals.set:
+                id: internal_action
+                value: 'false'
+                
+            - delay: 2s
+            - globals.set:
+                id: is_drying_down
+                value: 'false'
+                
+          else:
+            - globals.set:
+                id: is_drying_down
+                value: 'false'
