@@ -34,8 +34,7 @@ wifi:
 
 # Some settings are device specific for configurations. eg. Mitsubishi
 climate:
-  - platform: ${ac_platform}
-    id: !extend primary_ac
+  - id: !extend primary_ac
     name: "AC"
     set_fan_mode: quiet_4levels
 
