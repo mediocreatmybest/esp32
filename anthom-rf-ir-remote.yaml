@@ -148,6 +148,7 @@ sensor:
     name: "WiFi Signal dB"
     id: wifi_signal_db
     update_interval: 60s
+    disabled_by_default: true
     entity_category: diagnostic
     icon: "mdi:wifi-strength-1"
 
