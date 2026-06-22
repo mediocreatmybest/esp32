@@ -9,7 +9,10 @@ substitutions:
   # https://esphome.io/components/climate/climate_ir/ - List of supported platforms
   ac_platform: "mitsubishi"
   enable_heat: "false"
+  
+  # Identified Device specific options to be added here.
   enable_fan_only: "true"
+  set_fan_mode: quiet_4levels
 
   # WiFi Settings
   wifi_fast_connect: "false"
@@ -36,7 +39,9 @@ wifi:
 climate:
   - id: !extend primary_ac
     name: "AC"
-    set_fan_mode: quiet_4levels
+    supports_fan_only: ${enable_fan_only}
+    set_fan_mode: ${set_fan_mode}
+    
 
 api:
   # we can enable api encryption.
