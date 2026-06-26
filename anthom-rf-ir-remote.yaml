@@ -97,6 +97,14 @@ climate:
           then:
             - script.execute: dry_down_sequence
 
+      # Stop the OFF Timer if the AC is turned off manually
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - switch.turn_off: switch_timer_off
+
+
 #===========================================
 # Hardware Definitions and Sensors
 #===========================================
