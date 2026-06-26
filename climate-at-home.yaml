@@ -10,6 +10,7 @@ substitutions:
   ac_platform: "mitsubishi"
   enable_heat: "false"
   supports_fan_only: "true"
+  set_fan_mode: quiet_4levels
 
   # WiFi Settings
   wifi_fast_connect: "false"
@@ -37,7 +38,7 @@ climate:
   - platform: ${ac_platform}
     id: !extend primary_ac
     name: "AC"
-    set_fan_mode: quiet_4levels
+    set_fan_mode: ${set_fan_mode}
     supports_fan_only: ${supports_fan_only}
 
 api:
