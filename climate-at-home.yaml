@@ -11,8 +11,8 @@ substitutions:
   enable_heat: "false"
   
   # Identified Device specific options to be added here.
-  enable_fan_only: "true"
   set_fan_mode: quiet_4levels
+  supports_fan_only: "true"
 
   # WiFi Settings
   wifi_fast_connect: "false"
@@ -39,7 +39,7 @@ wifi:
 climate:
   - id: !extend primary_ac
     name: "AC"
-    supports_fan_only: ${enable_fan_only}
+    supports_fan_only: ${supports_fan_only}
     set_fan_mode: ${set_fan_mode}
     # Optional visual block for haos cards.
     visual:
