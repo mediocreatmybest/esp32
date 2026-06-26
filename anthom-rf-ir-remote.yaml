@@ -225,6 +225,16 @@ switch:
     entity_category: "config"
     optimistic: true
 
+  - platform: template
+    name: "OFF Timer"
+    id: switch_timer_off
+    icon: "mdi:clock-end"
+    optimistic: true
+    turn_on_action:
+      - script.execute: timer_off_sequence
+    turn_off_action:
+      - script.stop: timer_off_sequence
+
 #===========================================================
 # Global Variables and Settings for inbuilt logic.
 #===========================================================
@@ -243,8 +253,9 @@ globals:
 #===========================================================
 # Home Assistant Number Sliders for User UI Settings.
 #===========================================================
-# Mould reduction duration sliders. Duration and delay before being triggered.
+
 number:
+# Mould reduction duration sliders. Duration and delay before being triggered.
   - platform: template
     name: "Mould Reduction Duration"
     id: dry_down_duration
@@ -270,6 +281,21 @@ number:
     initial_value: 30
     optimistic: true
     restore_value: true
+
+# Slider for Timer OFF
+  - platform: template
+    name: "Timer OFF "
+    id: timer_off_duration
+    icon: "mdi:timer-cancel-outline"
+    entity_category: "config"
+    unit_of_measurement: "min"
+    min_value: 10
+    max_value: 240
+    step: 10
+    initial_value: 60
+    optimistic: true
+    restore_value: true
+
 
 #===========================================================
 # Scripts and Behaviour Logic.
@@ -325,3 +351,31 @@ script:
             - globals.set:
                 id: is_drying_down
                 value: 'false'
+
+  - id: timer_off_sequence
+    mode: restart # Restarting should reset the countdown if the user toggles the switch off and back on
+    then:
+      # Converting min to ms for the delay
+      - delay: !lambda 'return id(timer_off_duration).state * 60000;'
+      
+      # Lets check if the AC is actually ON and we aren't running a dry down sequence
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            # Raise our internal flag, turn OFF, lower flag
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: "OFF"
+            - delay: 500ms
+            - globals.set:
+                id: internal_action
+                value: 'false'
+                
+      # final step is to toggle the UI switch back to the off state
+      - switch.turn_off: switch_timer_off
