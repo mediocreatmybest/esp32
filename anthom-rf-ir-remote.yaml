@@ -144,6 +144,7 @@ binary_sensor:
     name: "Button"
     id: hardware_button
     disabled_by_default: true
+    internal: true
     on_multi_click:
       - timing:
           - ON for at least 4s
