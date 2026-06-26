@@ -41,7 +41,11 @@ climate:
     name: "AC"
     supports_fan_only: ${enable_fan_only}
     set_fan_mode: ${set_fan_mode}
-    
+    # Optional visual block for haos cards.
+    visual:
+      min_temperature: 15.0
+      max_temperature: 30.0
+      temperature_step: 1.0
 
 api:
   # we can enable api encryption.
