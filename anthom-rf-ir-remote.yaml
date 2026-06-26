@@ -84,7 +84,6 @@ climate:
     # TODO: Add in more dynamic naming based on substitutions for friendly_name and device type. AC, Heater, Fan, etc.
     name: "${name}-AC"
     supports_heat: ${enable_heat}
-    supports_fan_only: ${enable_fan_only}
     icon: "mdi:air-conditioner"
     # Set additional conditions for specific modes or switches.
     on_state:
