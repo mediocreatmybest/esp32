@@ -184,12 +184,14 @@ button:
     name: "Factory Reset"
     id: factory_reset_btn
     entity_category: config
+    disabled_by_default: true
 
   - platform: safe_mode
     name: "Safe Mode"
     id: safe_mode_btn
     internal: false
     entity_category: config
+    disabled_by_default: true
 
 # Controllable LED, can be used later internally for status.
 # TODO: Add logic to control this based on AC status.
