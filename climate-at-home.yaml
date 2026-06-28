@@ -21,7 +21,7 @@ packages:
   # Download hardware specific template from GitHub - https://esphome.io/components/packages/
   remote_package_files:
     url: https://github.com/mediocreatmybest/esp32
-    files: [anthom-rf-ir-remote.yaml]  # optional; if not specified, all files will be included
+    files: [athom-rf-ir-remote.yaml]  # optional; if not specified, all files will be included
     ref: main  # optional
     refresh: 1d  # optional
 

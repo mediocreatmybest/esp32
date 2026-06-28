@@ -1,0 +1,402 @@
+# Based on https://github.com/athom-tech/esp32-configs/blob/main/athom-rf-ir-remote.yaml
+
+#===========================================
+# Climate At Home Template
+#===========================================
+
+substitutions:
+  # Base Device Info
+  name: "Athom"
+  friendly_name: "Athom RF IR Remote"
+  room: ""
+  device_description: "Climate at Home, Athom esp32 RF433 IR Remote"
+  
+  # Project Info
+  project_name: "Climate at Home. Built on Athom RF IR Remote"
+  project_version: "v0.0.4"
+  
+  # Logging
+  log_level: "INFO"
+  
+  # Add Template Climate Overrides
+  ac_platform: "mitsubishi"
+  enable_heat: "false"
+  enable_fan_only: "true"
+
+  # GPIO Definitions
+  RF_RX_PIN: GPIO19
+  RF_TX_PIN: GPIO18
+  IR_RX_PIN: GPIO33
+  IR_TX_PIN: GPIO25
+  Button_PIN: GPIO0
+  LED_PIN: GPIO27
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: ${device_description}
+  area: ${room}
+  name_add_mac_suffix: true
+  min_version: 2026.5.1
+  project:
+    name: ${project_name}
+    version: ${project_version}
+  platformio_options:
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32dev
+  variant: esp32
+  flash_size: 8MB
+  framework:
+    type: esp-idf
+    version: recommended
+    sdkconfig_options:
+      # Testing BLE Proxy
+      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "30"
+    # Hardware specific options available for anthom-rf-ir-remote device.
+    advanced: 
+      minimum_chip_revision: "3.1"
+      sram1_as_iram: true
+
+# Testing BLE Proxy.
+bluetooth_proxy:
+  active: true
+  cache_services: true
+  connection_slots: 3
+
+preferences:
+  flash_write_interval: 1min
+
+ota:
+  - platform: esphome
+    id: ota_update
+
+logger:
+  level: ${log_level}
+
+mdns:
+  disabled: false
+
+#===========================================
+# Climate Definitions - Base settings.
+#===========================================
+climate:
+  - platform: ${ac_platform}
+    id: primary_ac
+    transmitter_id: ir_transmitter
+    receiver_id: ir_receiver
+    # TODO: Add in more dynamic naming based on substitutions for friendly_name and device type. AC, Heater, Fan, etc.
+    name: "${name}-AC"
+    supports_heat: ${enable_heat}
+    icon: "mdi:air-conditioner"
+    # Set additional conditions for specific modes or switches.
+    on_state:
+      # Running Mould Reduction sequence when AC is turn off if switch is enabled. 
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return id(switch_anti_mould).state;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            - script.execute: dry_down_sequence
+
+      # Stop the OFF Timer if the AC is turned off manually
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - switch.turn_off: switch_timer_off
+
+
+#===========================================
+# Hardware Definitions and Sensors
+#===========================================
+
+remote_receiver:
+  - pin:
+      number: ${IR_RX_PIN}
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    # Remove dump all in future after testing.
+    dump: all
+    tolerance: 55%
+    id: ir_receiver
+    
+remote_transmitter:
+  - pin:
+      number: ${IR_TX_PIN}
+      inverted: false
+    carrier_duty_percent: 50%
+    non_blocking: true
+    id: ir_transmitter
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    id: system_status
+    entity_category: "diagnostic"
+
+  - platform: gpio
+    pin:
+      number: ${Button_PIN}
+      mode:
+        input: true
+      inverted: true
+      # Quiet the boot strapping warning here.
+      ignore_strapping_warning: true
+
+    name: "Button"
+    id: hardware_button
+    disabled_by_default: true
+    internal: true
+    on_multi_click:
+      - timing:
+          - ON for at least 4s
+        then:
+          - button.press: factory_reset_btn
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: "mdi:wifi-strength-1"
+
+  # Simplistic Percentage conversion, TODO: should be looked at in future.
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    id: wifi_signal_percent
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: diagnostic
+    icon: "mdi:wifi-strength-1"
+
+# Physical button on device for restart and resets.
+
+button:
+  - platform: restart
+    name: "Restart"
+    id: restart_btn
+    entity_category: config
+    icon: "mdi:power-cycle"
+    
+  - platform: factory_reset
+    name: "Factory Reset"
+    id: factory_reset_btn
+    entity_category: config
+    disabled_by_default: true
+
+  - platform: safe_mode
+    name: "Safe Mode"
+    id: safe_mode_btn
+    internal: false
+    entity_category: config
+    disabled_by_default: true
+
+# Controllable LED, can be used later internally for status.
+# TODO: Add logic to control this based on AC status.
+output: 
+  - platform: gpio
+    pin: ${LED_PIN}
+    id: led_status_output
+    
+light:
+  - platform: binary
+    name: "Status LED"
+    id: athom_status_led
+    output: led_status_output
+    disabled_by_default: true
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      id: ip_address
+      entity_category: diagnostic
+    ssid:
+      name: "Connected SSID"
+      id: ssid
+      entity_category: diagnostic
+    mac_address:
+      name: "Mac Address"
+      id: mac_address
+      entity_category: diagnostic
+      icon: "mdi:check-network"
+
+
+#===========================================================
+# Switches for feature control and logic.
+#===========================================================
+
+switch:
+  - platform: template
+    name: "Mould Reduction Dry Down"
+    id: switch_anti_mould
+    icon: "mdi:weather-windy"
+    entity_category: "config"
+    optimistic: true
+
+  - platform: template
+    name: "OFF Timer"
+    id: switch_timer_off
+    icon: "mdi:clock-end"
+    optimistic: true
+    turn_on_action:
+      - script.execute: timer_off_sequence
+    turn_off_action:
+      - script.stop: timer_off_sequence
+
+#===========================================================
+# Global Variables and Settings for inbuilt logic.
+#===========================================================
+
+globals:
+  # we need to track if this is an internal action or external user action. 
+  - id: internal_action
+    type: bool
+    initial_value: 'false'
+  # Mould reduction action flag
+  - id: is_drying_down
+    type: bool
+    initial_value: 'false'
+
+
+#===========================================================
+# Home Assistant Number Sliders for User UI Settings.
+#===========================================================
+
+number:
+# Mould reduction duration sliders. Duration and delay before being triggered.
+  - platform: template
+    name: "Mould Reduction Duration"
+    id: dry_down_duration
+    icon: "mdi:timer-outline"
+    entity_category: "config"
+    unit_of_measurement: "min"
+    min_value: 5
+    max_value: 30
+    step: 5
+    initial_value: 10
+    optimistic: true
+    restore_value: true
+
+  - platform: template
+    name: "Mould Reduction Wait Delay"
+    id: dry_down_delay
+    icon: "mdi:timer-sand"
+    entity_category: "config"
+    unit_of_measurement: "s"
+    min_value: 0
+    max_value: 90
+    step: 5
+    initial_value: 30
+    optimistic: true
+    restore_value: true
+
+# Slider for Timer OFF
+  - platform: template
+    name: "Timer OFF "
+    id: timer_off_duration
+    icon: "mdi:timer-cancel-outline"
+    entity_category: "config"
+    unit_of_measurement: "min"
+    min_value: 10
+    max_value: 240
+    step: 10
+    initial_value: 60
+    optimistic: true
+    restore_value: true
+
+# TODO Add timer ON slider and logic.
+
+#===========================================================
+# Scripts and Behaviour Logic.
+#===========================================================
+
+# Mould Reduction script, to dry out ac unit when turned off.
+script:
+  - id: dry_down_sequence
+    mode: restart
+    then:
+      - globals.set:
+          id: is_drying_down
+          value: 'true'
+      # User set delay, set by number slider in haos.    
+      - delay: !lambda 'return id(dry_down_delay).state * 1000;'
+      # Check if the AC is still off, if so, switch to fan mode. If not, exit and reset drying down flag.
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            # Raise our flag, change to FAN, lower flag
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: "FAN_ONLY"
+            - delay: 500ms # We should buffer for state update between mode changes
+            - globals.set:
+                id: internal_action
+                value: 'false'
+            
+            - delay: !lambda 'return id(dry_down_duration).state * 60000;'
+            
+            # Raise our flag, turn OFF, lower flag
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: "OFF"
+            - delay: 500ms # We should buffer for state update between mode changes
+            - globals.set:
+                id: internal_action
+                value: 'false'
+                
+            - delay: 2s
+            - globals.set:
+                id: is_drying_down
+                value: 'false'
+                
+          else:
+            - globals.set:
+                id: is_drying_down
+                value: 'false'
+
+  - id: timer_off_sequence
+    mode: restart # Restarting should reset the countdown if the user toggles the switch off and back on
+    then:
+      # Converting min to ms for the delay
+      - delay: !lambda 'return id(timer_off_duration).state * 60000;'
+      
+      # Lets check if the AC is actually ON and we aren't running a dry down sequence
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            # Raise our internal flag, turn OFF, lower flag
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: "OFF"
+            - delay: 500ms
+            - globals.set:
+                id: internal_action
+                value: 'false'
+                
+      # final step is to toggle the UI switch back to the off state
+      - switch.turn_off: switch_timer_off
