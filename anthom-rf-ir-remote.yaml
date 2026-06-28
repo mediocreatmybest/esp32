@@ -234,7 +234,7 @@ text_sensor:
 
 
 #===========================================================
-# Switches for user control of features and logic.
+# Switches for feature control and logic.
 #===========================================================
 
 switch:
@@ -316,6 +316,7 @@ number:
     optimistic: true
     restore_value: true
 
+# TODO Add timer ON slider and logic.
 
 #===========================================================
 # Scripts and Behaviour Logic.
