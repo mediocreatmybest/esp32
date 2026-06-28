@@ -60,9 +60,6 @@ esp32:
       minimum_chip_revision: "3.1"
       sram1_as_iram: true
 
-# Quiet the strapping warning for this device. 
-ignore_strapping_warning: true
-
 # Testing BLE Proxy.
 bluetooth_proxy:
   active: true
@@ -150,6 +147,9 @@ binary_sensor:
       mode:
         input: true
       inverted: true
+      # Quiet the boot strapping warning here.
+      ignore_strapping_warning: true
+
     name: "Button"
     id: hardware_button
     disabled_by_default: true
