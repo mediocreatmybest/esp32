@@ -21,7 +21,7 @@ packages:
   # Download hardware specific template from GitHub - https://esphome.io/components/packages/
   remote_package_files:
     url: https://github.com/mediocreatmybest/esp32
-    files: [anthom-rf-ir-remote.yaml]  # optional; if not specified, all files will be included
+    files: [athom-rf-ir-remote.yaml]  # optional; if not specified, all files will be included
     ref: main  # optional
     refresh: 1d  # optional
 
@@ -53,3 +53,25 @@ api:
   #encryption:
      #key:
   reboot_timeout: 0s
+  # Optional BLE tracker from Athom-rf-ir yaml.
+  on_client_connected:
+    - esp32_ble_tracker.start_scan:
+        continuous: true
+  # Disable BLE tracking when there are no api connections live
+  on_client_disconnected:
+    if:
+      condition:
+        not:
+          api.connected:
+      then:
+        - esp32_ble_tracker.stop_scan:
+
+esp32_ble_tracker:
+  scan_parameters:
+    # Don't auto start BLE scanning, we control it in the `api` block's automation.
+    continuous: false
+    active: true  # send scan-request packets to gather more info, like device name for some devices.
+    interval: 320ms  # default 320ms - how long to spend on each advert channel
+    window:   300ms  # default 30ms - how long to actually "listen" in each interval. Reduce this if device is unstable.
+    # If the device cannot keep up or becomes unstable, reduce the "window" setting. This may be
+    # required if your device is controlling other sensors or doing PWM for lights etc.
