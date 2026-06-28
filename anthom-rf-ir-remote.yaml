@@ -52,13 +52,19 @@ esp32:
     type: esp-idf
     version: recommended
     sdkconfig_options:
-      # Should this be removed, need to test BLE proxy
-      # CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
-      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "10"      
+      # Testing BLE Proxy
+      CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "30"
     # Hardware specific options available for anthom-rf-ir-remote device.
     advanced: 
       minimum_chip_revision: "3.1"
       sram1_as_iram: true
+
+# Testing BLE Proxy.
+bluetooth_proxy:
+  active: true
+  cache_services: true
+  connection_slots: 3
 
 preferences:
   flash_write_interval: 1min
