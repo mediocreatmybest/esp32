@@ -9,8 +9,10 @@ substitutions:
   # https://esphome.io/components/climate/climate_ir/ - List of supported platforms
   ac_platform: "mitsubishi"
   enable_heat: "false"
-  supports_fan_only: "true"
+  
+  # Identified Device specific options to be added here.
   set_fan_mode: quiet_4levels
+  supports_fan_only: "true"
 
   # WiFi Settings
   wifi_fast_connect: "false"
@@ -35,11 +37,15 @@ wifi:
 
 # Some settings are device specific for configurations. eg. Mitsubishi
 climate:
-  - platform: ${ac_platform}
-    id: !extend primary_ac
+  - id: !extend primary_ac
     name: "AC"
-    set_fan_mode: ${set_fan_mode}
     supports_fan_only: ${supports_fan_only}
+    set_fan_mode: ${set_fan_mode}
+    # Optional visual block for haos cards.
+    visual:
+      min_temperature: 15.0
+      max_temperature: 30.0
+      temperature_step: 1.0
 
 api:
   # we can enable api encryption.
