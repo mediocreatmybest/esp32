@@ -105,6 +105,8 @@ climate:
       - if:
           condition:
             and:
+             # Add in grace period requirement.
+              - lambda: 'return !id(boot_grace_period);'
               - lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
               - lambda: 'return id(switch_anti_mould).state;'
               - lambda: 'return !id(is_drying_down);'
