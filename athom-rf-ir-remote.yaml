@@ -244,6 +244,7 @@ switch:
     icon: "mdi:weather-windy"
     entity_category: "config"
     optimistic: true
+    restore_value: true
 
   - platform: template
     name: "OFF Timer"
@@ -334,7 +335,19 @@ number:
     optimistic: true
     restore_value: true
 
-# TODO Add timer ON slider and logic.
+# TODO test timer ON slider and logic.
+  - platform: template
+    name: "Timer ON"
+    id: timer_on_duration
+    icon: "mdi:timer-play-outline"
+    entity_category: "config"
+    unit_of_measurement: "min"
+    min_value: 10
+    max_value: 240
+    step: 10
+    initial_value: 60
+    optimistic: true
+    restore_value: true
 
 #===========================================================
 # Scripts and Behaviour Logic.
