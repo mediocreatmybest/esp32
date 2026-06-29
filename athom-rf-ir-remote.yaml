@@ -269,6 +269,24 @@ globals:
     type: bool
     initial_value: 'false'
 
+#===========================================================
+# Dropdowns - Testing dropdown options
+#===========================================================
+select:
+  - platform: template
+    name: "Timer ON Mode"
+    id: timer_on_mode
+    icon: "mdi:air-conditioner"
+    entity_category: "config"
+    options:
+      - "COOL"
+      - "HEAT"
+      - "FAN_ONLY"
+      - "DRY"
+      - "AUTO"
+    initial_option: "COOL"
+    optimistic: true
+    restore_value: true
 
 #===========================================================
 # Home Assistant Number Sliders for User UI Settings.
