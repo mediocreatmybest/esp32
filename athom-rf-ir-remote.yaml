@@ -256,21 +256,25 @@ switch:
     optimistic: true
     restore_mode: "RESTORE_DEFAULT_OFF"
 
+  # Currently timers do not persist over reboots
   - platform: template
     name: "OFF Timer"
     id: switch_timer_off
     icon: "mdi:clock-end"
     optimistic: true
+    restore_mode: ALWAYS_OFF
     turn_on_action:
       - script.execute: timer_off_sequence
     turn_off_action:
       - script.stop: timer_off_sequence
-  
+
+  # Currently timers do not persist over reboots
   - platform: template
     name: "ON Timer"
     id: switch_timer_on
     icon: "mdi:clock-start"
     optimistic: true
+    restore_mode: ALWAYS_OFF
     turn_on_action:
       - script.execute: timer_on_sequence
     turn_off_action:
