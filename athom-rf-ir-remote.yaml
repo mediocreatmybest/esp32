@@ -271,6 +271,10 @@ switch:
 #===========================================================
 
 globals:
+  # we need to add a grace period on boot to prevent false start of triggers
+  - id: boot_grace_period
+    type: bool
+    initial_value: 'true'  # This needs to be true when the device boots   
   # we need to track if this is an internal action or external user action. 
   - id: internal_action
     type: bool
