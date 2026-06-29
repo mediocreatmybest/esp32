@@ -120,6 +120,12 @@ climate:
           then:
             - switch.turn_off: switch_timer_off
 
+      # Stop the ON Timer if the AC is turned on manually
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+          then:
+            - switch.turn_off: switch_timer_on
 
 #===========================================
 # Hardware Definitions and Sensors
