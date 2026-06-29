@@ -43,6 +43,14 @@ esphome:
     version: ${project_version}
   platformio_options:
     board_build.flash_mode: dio
+  # Add grace period for global
+  on_boot:
+    priority: -100 # Run at the end when booting
+    then:
+      - delay: 15s
+      - globals.set:
+          id: boot_grace_period
+          value: 'false'
 
 esp32:
   board: esp32dev
