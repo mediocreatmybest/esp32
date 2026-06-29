@@ -255,6 +255,16 @@ switch:
       - script.execute: timer_off_sequence
     turn_off_action:
       - script.stop: timer_off_sequence
+  
+  - platform: template
+    name: "ON Timer"
+    id: switch_timer_on
+    icon: "mdi:clock-start"
+    optimistic: true
+    turn_on_action:
+      - script.execute: timer_on_sequence
+    turn_off_action:
+      - script.stop: timer_on_sequence
 
 #===========================================================
 # Global Variables and Settings for inbuilt logic.
@@ -431,3 +441,60 @@ script:
                 
       # final step is to toggle the UI switch back to the off state
       - switch.turn_off: switch_timer_off
+
+# Timer ON logic
+  - id: timer_on_sequence
+    mode: restart
+    then:
+      # 1. We wait for the duration set by the slider
+      - delay: !lambda 'return id(timer_on_duration).state * 60000;'
+      
+      # 2. Flaged as an internal action
+      - globals.set:
+          id: internal_action
+          value: 'true'
+
+      # 3. Check the dropdown state and apply the correct mode
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).state == "COOL";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: "COOL"
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).state == "HEAT";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: "HEAT"
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).state == "FAN_ONLY";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: "FAN_ONLY"
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).state == "DRY";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: "DRY"
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).state == "AUTO";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: "AUTO"
+
+      # 4. Turn the UI switch back off and lower the flag again
+      - delay: 500ms
+      - globals.set:
+          id: internal_action
+          value: 'false'
+      - switch.turn_off: switch_timer_on
+
