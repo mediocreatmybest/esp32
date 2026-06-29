@@ -13,7 +13,7 @@ substitutions:
   
   # Project Info
   project_name: "Climate at Home. Built on Athom RF IR Remote"
-  project_version: "v0.0.4"
+  project_version: "v0.0.5"
   
   # Logging
   log_level: "INFO"
