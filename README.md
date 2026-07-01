@@ -21,4 +21,5 @@ Designed around the assumption that the device IR Remote will be the primary con
 
 TODO:
 
-- RF Controller
+- Move LED to internal and use for status.
+- RF Controller or RF proxy options.
