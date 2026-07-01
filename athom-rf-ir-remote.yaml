@@ -232,6 +232,14 @@ light:
           update_interval: 1s
           min_brightness: 10%
           max_brightness: 100%
+      - pulse:
+          name: "Heartbeat Pulse"
+          transition_length:
+            on_length: 200ms 
+            off_length: 400ms 
+          update_interval: 1.5s
+          min_brightness: 5%  
+          max_brightness: 100%
 
 text_sensor:
   - platform: wifi_info
