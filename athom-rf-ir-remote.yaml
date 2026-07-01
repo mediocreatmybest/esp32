@@ -348,7 +348,7 @@ number:
 
   # Single Timer Slider for both ON and OFF options
   - platform: template
-    name: "Timer Duration (On/Off)"
+    name: "Timer Duration (On⁄Off)"
     id: timer_duration
     icon: "mdi:timer-cog-outline"
     entity_category: "config"
