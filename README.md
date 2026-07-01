@@ -14,10 +14,11 @@ Designed around the assumption that the device IR Remote will be the primary con
 - IR-based climate control currently using Athom RF IR Remote hardware
 - Configurable AC platform/model settings (example, Mitsubishi)
 - Optional mould-reduction dry-down cycle and timer after AC is turned off
-- Optional OFF timer to automatically switch the AC off after a set duration
+- Optional simplified timer for ON or OFF aftet a set period of time.
+  - If the device is OFF the timer will switch the device ON
+  - If the device is ON the timer will switch the device OFF
 - Home Assistant Bluetooth Proxy
 
 TODO:
 
-- Optional ON timer with different modes
 - RF Controller
