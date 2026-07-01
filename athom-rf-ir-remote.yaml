@@ -113,19 +113,12 @@ climate:
           then:
             - script.execute: dry_down_sequence
 
-      # Stop the OFF Timer if the AC is turned off manually
+      # Stop the Auto-Timer if the AC state is changed manually
       - if:
           condition:
-            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+            lambda: 'return !id(internal_action);'
           then:
-            - switch.turn_off: switch_timer_off
-
-      # Stop the ON Timer if the AC is turned on manually
-      - if:
-          condition:
-            lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
-          then:
-            - switch.turn_off: switch_timer_on
+            - switch.turn_off: switch_auto_timer
 
 #===========================================
 # Hardware Definitions and Sensors
@@ -262,29 +255,27 @@ switch:
     optimistic: true
     restore_mode: "RESTORE_DEFAULT_OFF"
 
-  # Currently timers do not persist over reboots
   - platform: template
-    name: "OFF Timer"
-    id: switch_timer_off
-    icon: "mdi:clock-end"
+    name: "Timer"
+    id: switch_auto_timer
+    icon: "mdi:timer-outline"
     optimistic: true
     restore_mode: ALWAYS_OFF
     turn_on_action:
-      - script.execute: timer_off_sequence
+      - if:
+          # If the AC is OFF, run through the ON sequence
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - script.execute: timer_on_sequence
+          # If the AC is ON, run through the OFF sequence
+          else:
+            - script.execute: timer_off_sequence
     turn_off_action:
+      # stop both script sequences
+      - script.stop: timer_on_sequence
       - script.stop: timer_off_sequence
 
-  # Currently timers do not persist over reboots
-  - platform: template
-    name: "ON Timer"
-    id: switch_timer_on
-    icon: "mdi:clock-start"
-    optimistic: true
-    restore_mode: ALWAYS_OFF
-    turn_on_action:
-      - script.execute: timer_on_sequence
-    turn_off_action:
-      - script.stop: timer_on_sequence
 
 #===========================================================
 # Global Variables and Settings for inbuilt logic.
@@ -355,33 +346,20 @@ number:
     optimistic: true
     restore_value: true
 
-# Slider for Timer OFF
+  # Single Timer Slider for both ON and OFF options
   - platform: template
-    name: "Timer OFF "
-    id: timer_off_duration
-    icon: "mdi:timer-cancel-outline"
+    name: "Timer Duration (On/Off)"
+    id: timer_duration
+    icon: "mdi:timer-cog-outline"
     entity_category: "config"
     unit_of_measurement: "min"
     min_value: 10
     max_value: 240
     step: 10
-    initial_value: 60
+    initial_value: 90
     optimistic: true
     restore_value: true
 
-# TODO test timer ON slider and logic.
-  - platform: template
-    name: "Timer ON"
-    id: timer_on_duration
-    icon: "mdi:timer-play-outline"
-    entity_category: "config"
-    unit_of_measurement: "min"
-    min_value: 10
-    max_value: 240
-    step: 10
-    initial_value: 60
-    optimistic: true
-    restore_value: true
 
 #===========================================================
 # Scripts and Behaviour Logic.
