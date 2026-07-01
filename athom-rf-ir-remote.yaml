@@ -214,16 +214,24 @@ button:
 # Controllable LED, can be used later internally for status.
 # TODO: Add logic to control this based on AC status.
 output: 
-  - platform: gpio
+  - platform: ledc
     pin: ${LED_PIN}
     id: led_status_output
     
 light:
-  - platform: binary
+  - platform: monochromatic
     name: "Status LED"
     id: athom_status_led
     output: led_status_output
     disabled_by_default: true
+    effects:
+      - pulse:
+          name: "Pulse Test"
+          transition_length: 1s
+          update_interval: 1s
+          min_brightness: 10%
+          max_brightness: 100%
+
 
 text_sensor:
   - platform: wifi_info
