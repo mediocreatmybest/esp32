@@ -223,15 +223,15 @@ light:
     name: "Status LED"
     id: athom_status_led
     output: led_status_output
-    disabled_by_default: true
+    disabled_by_default: false
+    internal: false
     effects:
       - pulse:
-          name: "Pulse Test"
+          name: "Dry Down Status"
           transition_length: 1s
           update_interval: 1s
           min_brightness: 10%
           max_brightness: 100%
-
 
 text_sensor:
   - platform: wifi_info
@@ -248,7 +248,6 @@ text_sensor:
       id: mac_address
       entity_category: diagnostic
       icon: "mdi:check-network"
-
 
 #===========================================================
 # Switches for feature control and logic.
