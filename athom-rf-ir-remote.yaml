@@ -417,19 +417,17 @@ script:
                 value: 'false'
 
   - id: timer_off_sequence
-    mode: restart # Restarting should reset the countdown if the user toggles the switch off and back on
+    mode: restart
     then:
-      # Converting min to ms for the delay
-      - delay: !lambda 'return id(timer_off_duration).state * 60000;'
+      # Using the single slider for delay
+      - delay: !lambda 'return id(timer_duration).state * 60000;'
       
-      # Lets check if the AC is actually ON and we aren't running a dry down sequence
       - if:
           condition:
             and:
               - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
               - lambda: 'return !id(is_drying_down);'
           then:
-            # Raise our internal flag, turn OFF, lower flag
             - globals.set:
                 id: internal_action
                 value: 'true'
@@ -441,22 +439,19 @@ script:
                 id: internal_action
                 value: 'false'
                 
-      # final step is to toggle the UI switch back to the off state
-      - switch.turn_off: switch_timer_off
+      - switch.turn_off: switch_auto_timer
 
-# Timer ON logic
   - id: timer_on_sequence
     mode: restart
     then:
-      # 1. We wait for the duration set by the slider
-      - delay: !lambda 'return id(timer_on_duration).state * 60000;'
+      # Using the single slider for delay
+      - delay: !lambda 'return id(timer_duration).state * 60000;'
       
-      # 2. Flaged as an internal action
       - globals.set:
           id: internal_action
           value: 'true'
 
-      # 3. Check the dropdown state and apply the correct mode
+      # Check the dropdown state and apply the correct mode
       - if:
           condition:
             lambda: 'return id(timer_on_mode).state == "COOL";'
@@ -493,10 +488,9 @@ script:
                 id: primary_ac
                 mode: "AUTO"
 
-      # 4. Turn the UI switch back off and lower the flag again
       - delay: 500ms
       - globals.set:
           id: internal_action
           value: 'false'
-      - switch.turn_off: switch_timer_on
+      - switch.turn_off: switch_auto_timer
 
