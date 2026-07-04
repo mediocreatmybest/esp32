@@ -63,7 +63,7 @@ esp32:
       # For BLE Proxy
       CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
       CONFIG_ESP_TASK_WDT_TIMEOUT_S: "30"
-    # Hardware specific options for latest version of esphome that is available for anthom-rf-ir-remote device.
+    # Hardware specific options for latest version of ESPHome that is available for athom-rf-ir-remote device.
     advanced: 
       minimum_chip_revision: "3.1"
       sram1_as_iram: true
