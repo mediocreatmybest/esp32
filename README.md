@@ -1,25 +1,27 @@
 # ESP32 Projects
 
 My miscellaneous ESP32 projects and other unfinished related ESP32 ideas.
+I would love any pull requests or improvement suggestions.
 
-## Climate At Home
+## Climate at Home
 
-Climate At Home is a simple, local-first alternative to cloud-based AC thermostats.
-Built around the [Athom RF IR Remote](https://www.athom.tech/) hardware and [ESPHome Climate](https://esphome.io/components/climate/).
-Designed around the assumption that the device IR Remote will be the primary controller.
+Climate At Home is a simple, local-first alternative to cloud-based infrared/IR smart climate control.
+This is now a very easy replacement due to [Athom RF IR Remote](https://www.athom.tech/) hardware and [ESPHome Climate](https://esphome.io/components/climate/).
+These templates aim to make this as simplified as possible and is designed around the assumption that an IR remote will be the primary controller for the AC or heat pump.
 
 ### Features
 
+Not including the default features added by ESPHome Climate:
+
 - Local-first AC control through Home Assistant and ESPHome
-- IR-based climate control currently using Athom RF IR Remote hardware
-- Configurable AC platform/model settings (example, Mitsubishi)
-- Optional mould-reduction dry-down cycle and timer after AC is turned off
-- Optional simplified timer for ON or OFF aftet a set period of time.
-  - If the device is OFF the timer will switch the device ON
-  - If the device is ON the timer will switch the device OFF
-- Home Assistant Bluetooth Proxy
+- IR-based climate control with state tracking (This does depend on the climate platform being used)
+- Configurable AC platform/model settings (for example; Mitsubishi)
+- Optional mould-reduction or dry-down cycle with timer after an AC is turned off
+- Optional simplified timer for ON or OFF after a set period of time (disabled by default).
+  - If the device is OFF the auto timer will switch the device ON
+  - If the device is ON the auto timer will switch the device OFF
+- Home Assistant Bluetooth Proxy (enabled by default)
 
 TODO:
 
-- Move LED to internal and use for status.
-- RF Controller or RF proxy options.
+- Look into RF Controller or RF proxy options for control of other similar types of devices i.e., Fans.

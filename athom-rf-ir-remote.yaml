@@ -286,6 +286,7 @@ switch:
     icon: "mdi:timer-outline"
     optimistic: true
     restore_mode: ALWAYS_OFF
+    disabled_by_default: true
     turn_on_action:
       - if:
           # If the AC is OFF, run through the ON sequence
