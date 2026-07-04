@@ -1,8 +1,14 @@
+##########################################################################################################
+# Climate at Home - Example ESPHome YAML configuration for a climate device using an Athom RF IR Remote.
+##########################################################################################################
+
 substitutions:
   #  Device Info for overrides.
   name: "living-room"
-  friendly_name: "Living Room AC"
-  room: ""
+  # Entity Name Suffix for Climate device.
+  device_type_suffix: "AC" # e.g. "AC", "HeatPump", "Heater", "Fan", etc.
+  friendly_name: "Living Room" # Friendly name for the device, used in Home Assistant.
+  room: "Lounge"
   
   # Set climate defaults and model
   # https://esphome.io/components/climate/
@@ -48,7 +54,8 @@ wifi:
 # Some settings are device specific for configurations. eg. Mitsubishi
 climate:
   - id: !extend primary_ac
-    name: "AC"
+    # name: ${name}-${device_type_suffix} # e.g. "living-room-AC"
+    name: "${device_type_suffix}" # Alternative option to use only the device type suffix for the climate entity name.
     supports_fan_only: ${supports_fan_only}
     set_fan_mode: ${set_fan_mode}
     # Optional visual block for haos cards.
@@ -58,7 +65,7 @@ climate:
       temperature_step: 1.0
 
 api:
-  # we can enable api encryption.
+  # Enable api encryption.
   # https://esphome.io/components/api/
   #encryption:
      #key:
