@@ -123,24 +123,6 @@ binary_sensor:
     id: system_status
     entity_category: "diagnostic"
 
-  - platform: gpio
-    pin:
-      number: ${Button_PIN}
-      mode:
-        input: true
-      inverted: true
-      # Quiet the boot strapping warning here.
-      ignore_strapping_warning: true
-
-    name: "Button"
-    id: hardware_button
-    internal: true
-    on_multi_click:
-      - timing:
-          - ON for at least 4s
-        then:
-          - button.press: factory_reset_btn
-
 # TODO: Look at moving Wi-Fi into its own package, this should allow for thread options in future with the ESP32-C6. Keeping for now for simplicity.
 sensor:
   - platform: wifi_signal

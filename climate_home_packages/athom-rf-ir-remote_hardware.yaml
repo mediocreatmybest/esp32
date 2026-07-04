@@ -12,7 +12,7 @@ substitutions:
   IR_TX_PIN: GPIO25
   Button_PIN: GPIO0
   LED_PIN: GPIO27
-  hardware_description: "Athom esp32 RF433 IR Remote"
+  hardware_description: "Built on Athom RF IR Remote"
 
 esphome:
   platformio_options:
@@ -61,11 +61,6 @@ remote_transmitter:
     id: ir_transmitter
 
 binary_sensor:
-  - platform: status
-    name: "Status"
-    id: system_status
-    entity_category: "diagnostic"
-
   - platform: gpio
     pin:
       number: ${Button_PIN}
