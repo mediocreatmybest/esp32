@@ -23,7 +23,7 @@ packages:
   # Athom base template package for Athom RF IR Remote Climate.
   remote_package_files:
     url: https://github.com/mediocreatmybest/esp32
-    files: [athom-rf-ir-remote.yaml]
+    files: [climate_home_packages/athom-rf-ir-remote.yaml]
     ref: main  # optional
     refresh: 1d  # optional
   
@@ -31,7 +31,7 @@ packages:
   # Bluetooth Proxy Package, enabling Bluetooth proxy support.
   bluetooth_proxy_package_files:
     url: https://github.com/mediocreatmybest/esp32
-    files: [athom-rf-ir-remote_bluetooth-proxy.yaml]
+    files: [climate_home_packages/athom-rf-ir-remote_bluetooth-proxy.yaml]
     ref: main  # optional
     refresh: 1d  # optional
 
