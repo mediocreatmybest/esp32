@@ -13,7 +13,7 @@ substitutions:
   
   # Project Info
   project_name: "Climate at Home. Built on Athom RF IR Remote"
-  project_version: "v0.0.7"
+  project_version: "v0.1.0"
   
   # Logging
   log_level: "INFO"
@@ -377,7 +377,7 @@ number:
 
   # Single Timer Slider for both ON and OFF options
   - platform: template
-    name: "Timer Duration (On⁄Off)"
+    name: "Timer (On⁄Off)"
     id: timer_duration
     icon: "mdi:timer-cog-outline"
     entity_category: "config"
