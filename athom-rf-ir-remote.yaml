@@ -13,7 +13,7 @@ substitutions:
   
   # Project Info
   project_name: "Climate at Home. Built on Athom RF IR Remote"
-  project_version: "v0.0.6"
+  project_version: "v0.0.7"
   
   # Logging
   log_level: "INFO"
@@ -60,20 +60,21 @@ esp32:
     type: esp-idf
     version: recommended
     sdkconfig_options:
-      # Testing BLE Proxy
+      # For BLE Proxy
       CONFIG_BT_BLE_42_FEATURES_SUPPORTED: y
       CONFIG_ESP_TASK_WDT_TIMEOUT_S: "30"
-    # Hardware specific options available for anthom-rf-ir-remote device.
+    # Hardware specific options for latest version of ESPHome that is available for athom-rf-ir-remote device.
     advanced: 
       minimum_chip_revision: "3.1"
       sram1_as_iram: true
 
-# Testing BLE Proxy.
+# BLE Proxy.
 bluetooth_proxy:
   active: true
   cache_services: true
+  # 3 seems to be reasonable, but can be adjusted if needed.
   connection_slots: 3
-
+# Default preference by athom.
 preferences:
   flash_write_interval: 1min
 
@@ -101,7 +102,7 @@ climate:
     icon: "mdi:air-conditioner"
     # Set additional conditions for specific modes or switches.
     on_state:
-      # Running Mould Reduction sequence when AC is turn off if switch is enabled. 
+      # Running Mould Reduction sequence when AC is turned off if the switch is enabled.
       - if:
           condition:
             and:
@@ -119,6 +120,24 @@ climate:
             lambda: 'return !id(internal_action);'
           then:
             - switch.turn_off: switch_auto_timer
+      # Add LED Status control based on AC state.
+      - if: 
+          # If the AC is ON and we are NOT running the dry down sequence, set the LED to ON.
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            - light.turn_on:
+                id: athom_status_led
+                effect: "None"
+                brightness: 100%
+      # If the AC is OFF we turn the LED off.
+      - if :
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - light.turn_off: athom_status_led
 
 #===========================================
 # Hardware Definitions and Sensors
@@ -211,19 +230,26 @@ button:
     entity_category: config
     disabled_by_default: true
 
-# Controllable LED, can be used later internally for status.
-# TODO: Add logic to control this based on AC status.
+# Controllable LED, used for internal status.
 output: 
-  - platform: gpio
+  - platform: ledc
     pin: ${LED_PIN}
     id: led_status_output
-    
+# Switched to monochromatic light platform to allow for effects and brightness control.    
 light:
-  - platform: binary
+  - platform: monochromatic
     name: "Status LED"
     id: athom_status_led
     output: led_status_output
-    disabled_by_default: true
+    disabled_by_default: false
+    internal: true
+    effects:
+      - pulse:
+          name: "Dry Down Status"
+          transition_length: 1s
+          update_interval: 1s
+          min_brightness: 10%
+          max_brightness: 100%
 
 text_sensor:
   - platform: wifi_info
@@ -241,14 +267,13 @@ text_sensor:
       entity_category: diagnostic
       icon: "mdi:check-network"
 
-
 #===========================================================
 # Switches for feature control and logic.
 #===========================================================
 
 switch:
   - platform: template
-    name: "Mould Reduction Dry Down"
+    name: "Mould Reduction"
     id: switch_anti_mould
     icon: "mdi:weather-windy"
     entity_category: "config"
@@ -276,7 +301,6 @@ switch:
       - script.stop: timer_on_sequence
       - script.stop: timer_off_sequence
 
-
 #===========================================================
 # Global Variables and Settings for inbuilt logic.
 #===========================================================
@@ -296,8 +320,9 @@ globals:
     initial_value: 'false'
 
 #===========================================================
-# Dropdowns - Testing dropdown options
+# Dropdowns for User UI Settings.
 #===========================================================
+
 select:
   - platform: template
     name: "Timer ON Mode"
@@ -321,7 +346,7 @@ select:
 number:
 # Mould reduction duration sliders. Duration and delay before being triggered.
   - platform: template
-    name: "Mould Reduction Duration"
+    name: "Mould Reduction Timer"
     id: dry_down_duration
     icon: "mdi:timer-outline"
     entity_category: "config"
@@ -334,7 +359,7 @@ number:
     restore_value: true
 
   - platform: template
-    name: "Mould Reduction Wait Delay"
+    name: "Mould Reduction Delay"
     id: dry_down_delay
     icon: "mdi:timer-sand"
     entity_category: "config"
@@ -360,7 +385,6 @@ number:
     optimistic: true
     restore_value: true
 
-
 #===========================================================
 # Scripts and Behaviour Logic.
 #===========================================================
@@ -373,7 +397,7 @@ script:
       - globals.set:
           id: is_drying_down
           value: 'true'
-      # User set delay, set by number slider in haos.    
+      # User set delay, set by number slider in haos. / Time conversion for seconds to milliseconds for the delay.
       - delay: !lambda 'return id(dry_down_delay).state * 1000;'
       # Check if the AC is still off, if so, switch to fan mode. If not, exit and reset drying down flag.
       - if:
@@ -387,11 +411,16 @@ script:
             - climate.control:
                 id: primary_ac
                 mode: "FAN_ONLY"
-            - delay: 500ms # We should buffer for state update between mode changes
+             # We should buffer for state update between mode changes
+            - delay: 500ms
             - globals.set:
                 id: internal_action
                 value: 'false'
-            
+            # Switch the LED to pulse to show we are in dry down.    
+            - light.turn_on:
+                id: athom_status_led
+                effect: "Dry Down Status"
+            # Time conversion for minutes to milliseconds for the delay.
             - delay: !lambda 'return id(dry_down_duration).state * 60000;'
             
             # Raise our flag, turn OFF, lower flag
@@ -401,25 +430,33 @@ script:
             - climate.control:
                 id: primary_ac
                 mode: "OFF"
-            - delay: 500ms # We should buffer for state update between mode changes
+            # We should buffer for state update between mode changes
+            - delay: 500ms
             - globals.set:
                 id: internal_action
                 value: 'false'
-                
+            # Time to switch the LED back off to show we are done with dry down.
+            - light.turn_off: athom_status_led
+            # Add a short delay to ensure the device has time to process the OFF before we reset the flag.    
             - delay: 2s
             - globals.set:
                 id: is_drying_down
                 value: 'false'
-                
+          # If the AC is not OFF, we will exit the script and reset the drying down flag.
           else:
             - globals.set:
                 id: is_drying_down
                 value: 'false'
+            # Update LED to reflect current AC state (AC was turned back on during the delay)
+            - light.turn_on:
+                id: athom_status_led
+                effect: "None"
+                brightness: 100%
 
   - id: timer_off_sequence
     mode: restart
     then:
-      # Using the single slider for delay
+      # Using the single slider for delay / Time conversion for minutes to milliseconds for the delay.
       - delay: !lambda 'return id(timer_duration).state * 60000;'
       
       - if:
@@ -444,7 +481,7 @@ script:
   - id: timer_on_sequence
     mode: restart
     then:
-      # Using the single slider for delay
+      # Using the single slider for delay / Time conversion for minutes to milliseconds for the delay.
       - delay: !lambda 'return id(timer_duration).state * 60000;'
       
       - globals.set:
@@ -454,43 +491,42 @@ script:
       # Check the dropdown state and apply the correct mode
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "COOL";'
+            lambda: 'return id(timer_on_mode).current_option() == "COOL";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "COOL"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "HEAT";'
+            lambda: 'return id(timer_on_mode).current_option() == "HEAT";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "HEAT"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "FAN_ONLY";'
+            lambda: 'return id(timer_on_mode).current_option() == "FAN_ONLY";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "FAN_ONLY"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "DRY";'
+            lambda: 'return id(timer_on_mode).current_option() == "DRY";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "DRY"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "AUTO";'
+            lambda: 'return id(timer_on_mode).current_option() == "AUTO";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "AUTO"
-
+      # We should buffer for state update between mode changes
       - delay: 500ms
       - globals.set:
           id: internal_action
           value: 'false'
       - switch.turn_off: switch_auto_timer
-
