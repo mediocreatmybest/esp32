@@ -72,7 +72,7 @@ esp32:
 bluetooth_proxy:
   active: true
   cache_services: true
-  # 3 seems to be be resonable, but can be adjusted if needed. 
+  # 3 seems to be reasonable, but can be adjusted if needed.
   connection_slots: 3
 # Default preference by athom.
 preferences:
