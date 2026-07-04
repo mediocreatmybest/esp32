@@ -442,13 +442,16 @@ script:
             - globals.set:
                 id: is_drying_down
                 value: 'false'
-          # If the AC is not OFF, we will exit the script and reset the drying down flag.      
+          # If the AC is not OFF, we will exit the script and reset the drying down flag.
           else:
             - globals.set:
                 id: is_drying_down
                 value: 'false'
-            # Safety catch for the LED
-            - light.turn_off: athom_status_led
+            # Update LED to reflect current AC state (AC was turned back on during the delay)
+            - light.turn_on:
+                id: athom_status_led
+                effect: "None"
+                brightness: 100%
 
   - id: timer_off_sequence
     mode: restart
