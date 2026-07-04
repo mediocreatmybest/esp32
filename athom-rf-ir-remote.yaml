@@ -480,35 +480,35 @@ script:
       # Check the dropdown state and apply the correct mode
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "COOL";'
+            lambda: 'return id(timer_on_mode).current_option() == "COOL";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "COOL"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "HEAT";'
+            lambda: 'return id(timer_on_mode).current_option() == "HEAT";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "HEAT"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "FAN_ONLY";'
+            lambda: 'return id(timer_on_mode).current_option() == "FAN_ONLY";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "FAN_ONLY"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "DRY";'
+            lambda: 'return id(timer_on_mode).current_option() == "DRY";'
           then:
             - climate.control:
                 id: primary_ac
                 mode: "DRY"
       - if:
           condition:
-            lambda: 'return id(timer_on_mode).state == "AUTO";'
+            lambda: 'return id(timer_on_mode).current_option() == "AUTO";'
           then:
             - climate.control:
                 id: primary_ac
