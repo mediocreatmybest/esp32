@@ -102,7 +102,7 @@ climate:
     icon: "mdi:air-conditioner"
     # Set additional conditions for specific modes or switches.
     on_state:
-      # Running Mould Reduction sequence when AC is turn off if the switch is enabled. 
+      # Running Mould Reduction sequence when AC is turned off if the switch is enabled.
       - if:
           condition:
             and:
