@@ -102,11 +102,27 @@ climate:
     icon: "mdi:air-conditioner"
     # Set additional conditions for specific modes or switches.
     on_state:
+      # Add additional logic for any user based triggers or actions here.
+      - if:
+          condition:
+            lambda: 'return !id(internal_action);'
+          then:
+            - switch.turn_off: switch_auto_timer
+            # We need to cancel Dry Down for manual overrides with AC mode
+            - if:
+                condition:
+                  lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+                then:
+                  - script.stop: dry_down_sequence
+                  - globals.set:
+                      id: is_drying_down
+                      value: 'false'
+                  - light.turn_off: athom_status_led
+
       # Running Mould Reduction sequence when AC is turned off if the switch is enabled.
       - if:
           condition:
             and:
-             # Add in grace period requirement.
               - lambda: 'return !id(boot_grace_period);'
               - lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
               - lambda: 'return id(switch_anti_mould).state;'
@@ -114,14 +130,8 @@ climate:
           then:
             - script.execute: dry_down_sequence
 
-      # Stop the Auto-Timer if the AC state is changed manually
-      - if:
-          condition:
-            lambda: 'return !id(internal_action);'
-          then:
-            - switch.turn_off: switch_auto_timer
       # Add LED Status control based on AC state.
-      - if: 
+      - if:
           # If the AC is ON and we are NOT running the dry down sequence, set the LED to ON.
           condition:
             and:
@@ -132,8 +142,9 @@ climate:
                 id: athom_status_led
                 effect: "None"
                 brightness: 100%
+      
       # If the AC is OFF we turn the LED off.
-      - if :
+      - if:
           condition:
             lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
           then:
