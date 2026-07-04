@@ -1,6 +1,6 @@
 # ESP32 Projects
 
-My miscellaneous ESP32 projects and other unfinished related ESP32 ideas.
+My miscellaneous ESP32 projects and other unfinished related ESP32 ideas.  
 I would love any pull requests or improvement suggestions.
 
 ## Climate at Home
