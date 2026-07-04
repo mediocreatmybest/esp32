@@ -8,6 +8,7 @@ substitutions:
   # Base Device Info
   name: "Athom"
   friendly_name: "Athom RF IR Remote"
+  device_type_suffix: "AC" # e.g. "AC", "HeatPump", "Heater", "Fan", etc.
   room: ""
   device_description: "Climate at Home, Athom esp32 RF433 IR Remote"
   
@@ -89,7 +90,7 @@ climate:
     transmitter_id: ir_transmitter
     receiver_id: ir_receiver
     # TODO: Add in more dynamic naming based on substitutions for friendly_name and device type. AC, Heater, Fan, etc.
-    name: "${name}-AC"
+    name: "${name}-${device_type_suffix}"
     supports_heat: ${enable_heat}
     icon: "mdi:air-conditioner"
     # Set additional conditions for specific modes or switches.
@@ -281,7 +282,7 @@ switch:
     icon: "mdi:weather-windy"
     entity_category: "config"
     optimistic: true
-    restore_mode: "RESTORE_DEFAULT_OFF"
+    restore_mode: RESTORE_DEFAULT_OFF
 
   - platform: template
     name: "Timer"
