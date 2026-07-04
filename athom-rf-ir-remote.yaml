@@ -130,7 +130,7 @@ climate:
           then:
             - light.turn_on:
                 id: athom_status_led
-                effect: "none"
+                effect: "None"
                 brightness: 100%
       # If the AC is OFF we turn the LED off.
       - if :
