@@ -101,7 +101,7 @@ climate:
     icon: "mdi:air-conditioner"
     # Set additional conditions for specific modes or switches.
     on_state:
-      # Running Mould Reduction sequence when AC is turn off if switch is enabled. 
+      # Running Mould Reduction sequence when AC is turn off if the switch is enabled. 
       - if:
           condition:
             and:
@@ -119,6 +119,25 @@ climate:
             lambda: 'return !id(internal_action);'
           then:
             - switch.turn_off: switch_auto_timer
+      # Add LED Status control based on AC state.
+      - if: 
+          # If the AC is ON and we are NOT running the dry down sequence, set the LED to ON.
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            - light.turn_on:
+                id: athom_status_led
+                effect: none
+                brightness: 100%
+      # If the AC is OFF we turn the LED off.
+      - if :
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - light.turn_off: athom_status_led
+
 
 #===========================================
 # Hardware Definitions and Sensors
@@ -255,7 +274,7 @@ text_sensor:
 
 switch:
   - platform: template
-    name: "Mould Reduction Dry Down"
+    name: "Mould Reduction"
     id: switch_anti_mould
     icon: "mdi:weather-windy"
     entity_category: "config"
@@ -283,7 +302,6 @@ switch:
       - script.stop: timer_on_sequence
       - script.stop: timer_off_sequence
 
-
 #===========================================================
 # Global Variables and Settings for inbuilt logic.
 #===========================================================
@@ -303,8 +321,9 @@ globals:
     initial_value: 'false'
 
 #===========================================================
-# Dropdowns - Testing dropdown options
+# Dropdowns for User UI Settings.
 #===========================================================
+
 select:
   - platform: template
     name: "Timer ON Mode"
@@ -328,7 +347,7 @@ select:
 number:
 # Mould reduction duration sliders. Duration and delay before being triggered.
   - platform: template
-    name: "Mould Reduction Duration"
+    name: "Mould Reduction Timer"
     id: dry_down_duration
     icon: "mdi:timer-outline"
     entity_category: "config"
@@ -341,7 +360,7 @@ number:
     restore_value: true
 
   - platform: template
-    name: "Mould Reduction Wait Delay"
+    name: "Mould Reduction Delay"
     id: dry_down_delay
     icon: "mdi:timer-sand"
     entity_category: "config"
@@ -367,7 +386,6 @@ number:
     optimistic: true
     restore_value: true
 
-
 #===========================================================
 # Scripts and Behaviour Logic.
 #===========================================================
@@ -380,7 +398,7 @@ script:
       - globals.set:
           id: is_drying_down
           value: 'true'
-      # User set delay, set by number slider in haos.    
+      # User set delay, set by number slider in haos.
       - delay: !lambda 'return id(dry_down_delay).state * 1000;'
       # Check if the AC is still off, if so, switch to fan mode. If not, exit and reset drying down flag.
       - if:
@@ -394,11 +412,11 @@ script:
             - climate.control:
                 id: primary_ac
                 mode: "FAN_ONLY"
-            - delay: 500ms # We should buffer for state update between mode changes
+             # We should buffer for state update between mode changes
+            - delay: 500ms
             - globals.set:
                 id: internal_action
-                value: 'false'
-            
+                value: 'false'    
             - delay: !lambda 'return id(dry_down_duration).state * 60000;'
             
             # Raise our flag, turn OFF, lower flag
@@ -408,16 +426,17 @@ script:
             - climate.control:
                 id: primary_ac
                 mode: "OFF"
-            - delay: 500ms # We should buffer for state update between mode changes
+            # We should buffer for state update between mode changes
+            - delay: 500ms
             - globals.set:
                 id: internal_action
                 value: 'false'
-                
+            # Add a short delay to ensure the device has time to process the OFF before we reset the flag.    
             - delay: 2s
             - globals.set:
                 id: is_drying_down
                 value: 'false'
-                
+          # If the AC is not OFF, we will exit the script and reset the drying down flag.      
           else:
             - globals.set:
                 id: is_drying_down
@@ -500,4 +519,3 @@ script:
           id: internal_action
           value: 'false'
       - switch.turn_off: switch_auto_timer
-
