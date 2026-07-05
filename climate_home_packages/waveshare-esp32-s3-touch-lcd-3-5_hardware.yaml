@@ -6,7 +6,7 @@
 substitutions:
   # GPIO Definitions
   IR_RX_PIN: GPIO21 # This needs to be changed if the IR receiver is connected to a different pin
-  IR_TX_PIN: GPIO25 # This needs to be changed if the IR transmitter is connected to a different pin
+  IR_TX_PIN: GPIO38 # This needs to be changed if the IR transmitter is connected to a different pin
   hardware_description: "built_on_waveshare_esp32_s3_touch_lcd_3_5"
   log_level: "DEBUG"
   
