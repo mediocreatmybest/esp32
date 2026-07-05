@@ -1,0 +1,127 @@
+#=================================================================
+# Climate At Home - Hardware Template ESP32-S3-Touch-LCD-3.5 - WIP
+#=================================================================
+# Hardware - https://docs.waveshare.com/ESP32-S3-Touch-LCD-3.5
+
+substitutions:
+  # GPIO Definitions
+  IR_RX_PIN: GPIO21 # This needs to be changed if the IR receiver is connected to a different pin
+  IR_TX_PIN: GPIO25 # This needs to be changed if the IR transmitter is connected to a different pin
+  hardware_description: "Built on Waveshare ESP32-S3-Touch-LCD-3.5"
+  log_level: "DEBUG"
+  
+esphome:
+
+logger:
+  level: ${log_level}
+
+debug:
+
+# Need to confirm PRAM defaults, unable to locate solid docs on this.
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ESP32-S3 specific configuration
+esp32:
+  variant: esp32s3
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
+      CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
+      CONFIG_SPIRAM_RODATA: "y"
+
+preferences:
+  flash_write_interval: 1min
+
+# I2C bus configuration
+i2c:
+  - id: i2c_bus
+    sda: 8
+    scl: 7
+    scan: true
+
+# PCA9554 GPIO extender for display reset
+pca9554:
+  - id: p_c_a
+    address: 0x20
+    i2c_id: i2c_bus
+
+# Backlight PWM output and light component
+output:
+    # Backlight LED
+  - platform: ledc
+    pin: GPIO06
+    id: GPIO06
+    frequency: 2000Hz
+    channel: 0
+
+light:
+  - platform: monochromatic
+    output: GPIO06
+    name: Display Backlight
+    id: display_backlight
+    restore_mode: ALWAYS_OFF
+    gamma_correct: 1
+
+spi:
+  id: display_spi
+  clk_pin: GPIO05
+  mosi_pin: GPIO01
+  miso_pin: GPIO02
+
+# We need to use the mipi_spi due to deprecation of previous drivers.
+# Note: Removal of any rotation or mirroring when using LVGL in display driver.
+display:
+  - platform: mipi_spi
+    model: st7796
+    id: device_display
+    spi_id: display_spi
+    cs_pin:
+      pca9554: p_c_a
+      number: 2
+    dc_pin: 3
+    reset_pin:
+      pca9554: p_c_a
+      number: 1
+    spi_mode: 1
+    color_order: bgr
+    pixel_mode: 16bit
+    auto_clear_enabled: false
+    update_interval: never
+
+# We need to look at sleep and wakeup options, based on touch for the moment.
+# Need to confirm touch locations and mirroring. 
+touchscreen:
+  platform: ft63x6
+  id: device_touchscreen
+  transform:
+    swap_xy: true
+    mirror_x: false
+    mirror_y: true
+  on_touch:
+    - lambda: |-
+          ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
+              touch.x,
+              touch.y,
+              touch.x_raw,
+              touch.y_raw
+              );
+
+button:
+  - platform: restart
+    icon: mdi:power-cycle
+    name: "Restart"
+    entity_category: "config"
+
+  - platform: factory_reset
+    disabled_by_default: true
+    name: "Factory Reset"
+    id: factory_reset_all
+    entity_category: "config"
+
