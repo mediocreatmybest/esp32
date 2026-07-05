@@ -17,7 +17,7 @@ logger:
 
 debug:
 
-# Need to confirm PRAM defaults, unable to locate solid docs on this.
+# Need to confirm PSRAM defaults, unable to locate solid docs on this.
 psram:
   mode: octal
   speed: 80MHz
