@@ -39,6 +39,30 @@ esp32:
 preferences:
   flash_write_interval: 1min
 
+#=============================================================
+# Hardware Definitions and Sensors
+#=============================================================
+
+remote_receiver:
+  - pin:
+      number: ${IR_RX_PIN}
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    # Remove dump all in future after testing.
+    dump: all
+    tolerance: 55%
+    id: ir_receiver
+    
+remote_transmitter:
+  - pin:
+      number: ${IR_TX_PIN}
+      inverted: false
+    carrier_duty_percent: 50%
+    non_blocking: true
+    id: ir_transmitter
+
 # I2C bus configuration
 i2c:
   - id: i2c_bus
