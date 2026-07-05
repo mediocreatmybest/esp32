@@ -28,7 +28,7 @@ substitutions:
 packages:
   remote_file_packages:
     url: https://github.com/mediocreatmybest/esp32
-    ref: dev  # optional
+    ref: main  # optional
     refresh: 0d  # optional
     files:
       # Main Climate at Home Package (required)
