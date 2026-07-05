@@ -59,7 +59,6 @@ climate:
     id: primary_ac
     transmitter_id: ir_transmitter
     receiver_id: ir_receiver
-    # TODO: Add in more dynamic naming based on substitutions for friendly_name and device type. AC, Heater, Fan, etc.
     name: "${name}-${device_type_suffix}"
     supports_heat: ${enable_heat}
     icon: "mdi:air-conditioner"
