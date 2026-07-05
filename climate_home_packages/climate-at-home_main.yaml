@@ -123,44 +123,6 @@ binary_sensor:
     id: system_status
     entity_category: "diagnostic"
 
-# TODO: Look at moving Wi-Fi into its own package, this should allow for thread options in future with the ESP32-C6. Keeping for now for simplicity.
-sensor:
-  - platform: wifi_signal
-    name: "WiFi Signal dB"
-    id: wifi_signal_db
-    update_interval: 60s
-    disabled_by_default: true
-    entity_category: diagnostic
-    icon: "mdi:wifi-strength-1"
-
-  # Simplistic Percentage conversion, TODO: should be looked at in future.
-  - platform: copy
-    source_id: wifi_signal_db
-    name: "WiFi Signal Percent"
-    id: wifi_signal_percent
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: "%"
-    entity_category: diagnostic
-    icon: "mdi:wifi-strength-1"
-
-# TODO: Look at moving Wi-Fi into its own package, this should allow for thread options in future with the ESP32-C6. Keeping for now for simplicity.
-text_sensor:
-  - platform: wifi_info
-    ip_address:
-      name: "IP Address"
-      id: ip_address
-      entity_category: diagnostic
-    ssid:
-      name: "Connected SSID"
-      id: ssid
-      entity_category: diagnostic
-    mac_address:
-      name: "Mac Address"
-      id: mac_address
-      entity_category: diagnostic
-      icon: "mdi:check-network"
-
 #===========================================================
 # Switches for feature control and logic.
 #===========================================================

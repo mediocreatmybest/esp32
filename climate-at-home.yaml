@@ -26,20 +26,26 @@ substitutions:
 # Packages to build Climate at Home. 
 # Using examples from: https://esphome.io/components/packages/
 packages:
-  # Athom base template package for Athom RF IR Remote Climate.
-  remote_package_files:
+  remote_file_packages:
     url: https://github.com/mediocreatmybest/esp32
-    files: [climate_home_packages/athom-rf-ir-remote.yaml]
-    ref: main  # optional
-    refresh: 1d  # optional
-  
-  # Comment out any feature packages that are not wanted or needed in the build.
-  # Bluetooth Proxy Package, enabling Bluetooth proxy support.
-  bluetooth_proxy_package_files:
-    url: https://github.com/mediocreatmybest/esp32
-    files: [climate_home_packages/athom-rf-ir-remote_bluetooth-proxy.yaml]
-    ref: main  # optional
-    refresh: 1d  # optional
+    ref: dev  # optional
+    refresh: 0d  # optional
+    files:
+      # Main Climate at Home Package (required)
+      - climate_home_packages/climate-at-home_main.yaml
+      
+      # Hardware template package for Athom RF IR Remote Climate. (a hardware template is required)
+      - climate_home_packages/athom-rf-ir-remote_hardware.yaml
+      
+      ################################################################################
+      # Comment out any feature packages that are not wanted or needed in the build. #
+      ################################################################################
+      
+      # Bluetooth Proxy Package, enabling Bluetooth proxy support.
+      - climate_home_packages/athom-rf-ir-remote_bluetooth-proxy.yaml
+      
+      # Wi-Fi sensors, can be removed if you are using Thread for example.
+      - climate_home_packages/climate-at-home_wifi.yaml
 
 # Defaulting to false to avoid trailing suffix on device names.
 esphome:
