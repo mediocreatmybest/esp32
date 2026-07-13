@@ -24,6 +24,7 @@ These templates aim to make this as simplified as possible and is designed aroun
 TODO:
 
 - Look into RF Controller or RF proxy options for control of other similar types of devices i.e., Fans.
+- Add optional maintenance pause switch. Pause any inbuilt automations, e.g., cleaning, etc.
 - Look at other hardware, such as Waveshare ESP32 S3 Touch LCD 3.5c.
 - Create more modular YAML configurations
   - To allow adding in touch display without touching main climate configurations. e.g., using LVGL with ESPHome with Climate interface.
