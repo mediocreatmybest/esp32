@@ -55,7 +55,7 @@ remote_receiver:
         input: true
         pullup: true
     # Remove dump all in future after testing.
-    dump: all
+    # dump: all
     tolerance: 55%
     id: ir_receiver
     
