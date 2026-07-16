@@ -99,8 +99,8 @@ switch:
     turn_on_action:
       - script.execute: lcd_wake
       - lvgl.widget.hide:
-          - lcd_touch_crosshair_horizontal
-          - lcd_touch_crosshair_vertical
+          - lcd_touch_crosshair_down
+          - lcd_touch_crosshair_up
       - lvgl.widget.show: lcd_touch_diagnostic_overlay
     turn_off_action:
       - lvgl.widget.hide: lcd_touch_diagnostic_overlay
@@ -434,18 +434,6 @@ lvgl:
           radius: 0
           pad_all: 0
           border_width: 0
-          on_press:
-            - lambda: |-
-                // LVGL event coordinates include its configured display
-                // rotation, matching the coordinates used for button hits.
-                lv_obj_set_pos(id(lcd_touch_crosshair_horizontal), point.x - 10, point.y);
-                lv_obj_set_pos(id(lcd_touch_crosshair_vertical), point.x, point.y - 10);
-                lv_obj_clear_flag(id(lcd_touch_crosshair_horizontal), LV_OBJ_FLAG_HIDDEN);
-                lv_obj_clear_flag(id(lcd_touch_crosshair_vertical), LV_OBJ_FLAG_HIDDEN);
-          on_pressing:
-            - lambda: |-
-                lv_obj_set_pos(id(lcd_touch_crosshair_horizontal), point.x - 10, point.y);
-                lv_obj_set_pos(id(lcd_touch_crosshair_vertical), point.x, point.y - 10);
           widgets:
             - spinner:
                 align: CENTER
@@ -470,29 +458,39 @@ lvgl:
           radius: 0
           pad_all: 0
           border_width: 0
+          on_press:
+            - lambda: |-
+                // LVGL event coordinates include its configured display
+                // rotation, matching the coordinates used for button hits.
+                lv_obj_set_pos(id(lcd_touch_crosshair_down)->obj, point.x - 10, point.y - 10);
+                lv_obj_set_pos(id(lcd_touch_crosshair_up)->obj, point.x - 10, point.y - 10);
+                lv_obj_clear_flag(id(lcd_touch_crosshair_down)->obj, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(id(lcd_touch_crosshair_up)->obj, LV_OBJ_FLAG_HIDDEN);
+          on_pressing:
+            - lambda: |-
+                lv_obj_set_pos(id(lcd_touch_crosshair_down)->obj, point.x - 10, point.y - 10);
+                lv_obj_set_pos(id(lcd_touch_crosshair_up)->obj, point.x - 10, point.y - 10);
           widgets:
-            - obj:
-                id: lcd_touch_crosshair_horizontal
+            - line:
+                id: lcd_touch_crosshair_down
                 hidden: true
                 align: TOP_LEFT
-                width: 21
-                height: 1
-                bg_color: ${color_accent}
-                bg_opa: COVER
-                radius: 0
-                pad_all: 0
-                border_width: 0
-            - obj:
-                id: lcd_touch_crosshair_vertical
+                line_color: ${color_accent}
+                line_width: 2
+                line_rounded: true
+                points:
+                  - 0, 0
+                  - 20, 20
+            - line:
+                id: lcd_touch_crosshair_up
                 hidden: true
                 align: TOP_LEFT
-                width: 1
-                height: 21
-                bg_color: ${color_accent}
-                bg_opa: COVER
-                radius: 0
-                pad_all: 0
-                border_width: 0
+                line_color: ${color_accent}
+                line_width: 2
+                line_rounded: true
+                points:
+                  - 20, 0
+                  - 0, 20
 
   pages:
     - id: climate_lcd_page
