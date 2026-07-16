@@ -84,8 +84,39 @@ climate:
 
 # Add wake handling to the touchscreen defined by the hardware package.
 touchscreen:
-    on_touch:
+  on_touch:
+    - script.execute: lcd_wake
+    - if:
+        condition:
+          switch.is_on: lcd_touch_diagnostic
+        then:
+          - lambda: |-
+              // touch.x/y have already passed through the transform configured
+              // by the hardware touchscreen component.
+              const int x = touch.x;
+              const int y = touch.y;
+              lv_obj_set_pos(id(lcd_touch_crosshair_horizontal), x - 10, y);
+              lv_obj_set_pos(id(lcd_touch_crosshair_vertical), x, y - 10);
+              lv_obj_clear_flag(id(lcd_touch_crosshair_horizontal), LV_OBJ_FLAG_HIDDEN);
+              lv_obj_clear_flag(id(lcd_touch_crosshair_vertical), LV_OBJ_FLAG_HIDDEN);
+
+switch:
+  - platform: template
+    name: "Touch Diagnostic"
+    id: lcd_touch_diagnostic
+    icon: mdi:crosshairs-gps
+    entity_category: diagnostic
+    disabled_by_default: true
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_on_action:
       - script.execute: lcd_wake
+      - lvgl.widget.hide:
+          - lcd_touch_crosshair_horizontal
+          - lcd_touch_crosshair_vertical
+      - lvgl.widget.show: lcd_touch_diagnostic_overlay
+    turn_off_action:
+      - lvgl.widget.hide: lcd_touch_diagnostic_overlay
 
 number:
   - platform: template
@@ -427,6 +458,42 @@ lvgl:
                 indicator:
                   arc_color: ${color_accent}
                   arc_width: 8
+      # Full-screen touch diagnostic overlay. It contains no labels or other widgets for calibration reference.
+
+      - obj:
+          id: lcd_touch_diagnostic_overlay
+          hidden: true
+          align: TOP_LEFT
+          width: 100%
+          height: 100%
+          bg_color: 0x000000
+          bg_opa: COVER
+          radius: 0
+          pad_all: 0
+          border_width: 0
+          widgets:
+            - obj:
+                id: lcd_touch_crosshair_horizontal
+                hidden: true
+                align: TOP_LEFT
+                width: 21
+                height: 1
+                bg_color: ${color_accent}
+                bg_opa: COVER
+                radius: 0
+                pad_all: 0
+                border_width: 0
+            - obj:
+                id: lcd_touch_crosshair_vertical
+                hidden: true
+                align: TOP_LEFT
+                width: 1
+                height: 21
+                bg_color: ${color_accent}
+                bg_opa: COVER
+                radius: 0
+                pad_all: 0
+                border_width: 0
 
   pages:
     - id: climate_lcd_page
