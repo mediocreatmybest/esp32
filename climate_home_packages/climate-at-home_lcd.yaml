@@ -86,19 +86,6 @@ climate:
 touchscreen:
   on_touch:
     - script.execute: lcd_wake
-    - if:
-        condition:
-          switch.is_on: lcd_touch_diagnostic
-        then:
-          - lambda: |-
-              // touch.x/y have already passed through the transform configured
-              // by the hardware touchscreen component.
-              const int x = touch.x;
-              const int y = touch.y;
-              lv_obj_set_pos(id(lcd_touch_crosshair_horizontal), x - 10, y);
-              lv_obj_set_pos(id(lcd_touch_crosshair_vertical), x, y - 10);
-              lv_obj_clear_flag(id(lcd_touch_crosshair_horizontal), LV_OBJ_FLAG_HIDDEN);
-              lv_obj_clear_flag(id(lcd_touch_crosshair_vertical), LV_OBJ_FLAG_HIDDEN);
 
 switch:
   - platform: template
@@ -447,6 +434,18 @@ lvgl:
           radius: 0
           pad_all: 0
           border_width: 0
+          on_press:
+            - lambda: |-
+                // LVGL event coordinates include its configured display
+                // rotation, matching the coordinates used for button hits.
+                lv_obj_set_pos(id(lcd_touch_crosshair_horizontal), point.x - 10, point.y);
+                lv_obj_set_pos(id(lcd_touch_crosshair_vertical), point.x, point.y - 10);
+                lv_obj_clear_flag(id(lcd_touch_crosshair_horizontal), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(id(lcd_touch_crosshair_vertical), LV_OBJ_FLAG_HIDDEN);
+          on_pressing:
+            - lambda: |-
+                lv_obj_set_pos(id(lcd_touch_crosshair_horizontal), point.x - 10, point.y);
+                lv_obj_set_pos(id(lcd_touch_crosshair_vertical), point.x, point.y - 10);
           widgets:
             - spinner:
                 align: CENTER
