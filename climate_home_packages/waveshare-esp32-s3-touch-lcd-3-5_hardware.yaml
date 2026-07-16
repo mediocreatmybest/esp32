@@ -136,7 +136,7 @@ touchscreen:
   id: device_touchscreen
   transform:
     swap_xy: true
-    mirror_x: true
+    mirror_x: false
     mirror_y: true
   calibration:
     x_min: 0
