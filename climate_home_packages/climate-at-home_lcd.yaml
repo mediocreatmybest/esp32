@@ -84,7 +84,6 @@ climate:
 
 # Add wake handling to the touchscreen defined by the hardware package.
 touchscreen:
-  - id: !extend device_touchscreen
     on_touch:
       - script.execute: lcd_wake
 
