@@ -135,9 +135,9 @@ touchscreen:
   platform: ft63x6
   id: device_touchscreen
   transform:
-    swap_xy: true
+    swap_xy: false
     mirror_x: false
-    mirror_y: true
+    mirror_y: false
   calibration:
     x_min: 0
     x_max: 480
