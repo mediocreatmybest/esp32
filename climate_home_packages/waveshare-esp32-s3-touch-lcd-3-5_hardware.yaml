@@ -63,6 +63,16 @@ remote_transmitter:
     non_blocking: true
     id: ir_transmitter
 
+#=============================================================
+# Hardware LED Status - Placeholder
+#=============================================================
+# We don't have a typical LED status in this hardware, so we need the fallback status light to be a global to allow for the typical behaviour of the main yaml. 
+
+globals:
+  - id: hardware_led_target_state
+    type: std::string
+    initial_value: '"OFF"'
+
 # I2C bus configuration
 i2c:
   - id: i2c_bus

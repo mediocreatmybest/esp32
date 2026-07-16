@@ -42,7 +42,7 @@ preferences:
 #=============================================================
 
 globals:
-  # Track the requested LED state so the main climate package can remain hardware-agnostic.
+  # Tracking the LED state so the main climate package can remain hardware-agnostic.
   - id: hardware_led_target_state
     type: std::string
     initial_value: '"OFF"'
