@@ -83,7 +83,7 @@ climate:
                       value: 'false'
                   - globals.set:
                       id: hardware_led_target_state
-                      value: 'OFF'
+                      value: '"OFF"'
                   - light.turn_off: ${hardware_status_led}
 
       # Running Mould Reduction sequence when AC is turned off if the switch is enabled.
@@ -111,7 +111,7 @@ climate:
                 brightness: 100%
             - globals.set:
                 id: hardware_led_target_state
-                value: 'ON'
+                value: '"ON"'
       
       # If the AC is OFF we turn the LED off.
       - if:
@@ -120,7 +120,7 @@ climate:
           then:
             - globals.set:
                 id: hardware_led_target_state
-                value: 'OFF'
+                value: '"OFF"'
             - light.turn_off: ${hardware_status_led}
 
 #===========================================
@@ -316,7 +316,7 @@ script:
                 effect: "Dry Down Status"
             - globals.set:
                 id: hardware_led_target_state
-                value: 'DRY_DOWN'
+                value: '"DRY_DOWN"'
             # Time conversion for minutes to milliseconds for the delay.
             - delay: !lambda 'return id(dry_down_duration).state * 60000;'
             
@@ -335,7 +335,7 @@ script:
             # Time to switch the LED back off to show we are done with dry down.
             - globals.set:
                 id: hardware_led_target_state
-                value: 'OFF'
+                value: '"OFF"'
             - light.turn_off: ${hardware_status_led}
             # Add a short delay to ensure the device has time to process the OFF before we reset the flag.    
             - delay: 2s
@@ -354,7 +354,7 @@ script:
                 brightness: 100%
             - globals.set:
                 id: hardware_led_target_state
-                value: 'ON'
+                value: '"ON"'
 
   - id: timer_off_sequence
     mode: restart
