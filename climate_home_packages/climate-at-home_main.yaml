@@ -312,11 +312,11 @@ script:
                 value: 'false'
             # Switch the LED to pulse to show we are in dry down.    
             - light.turn_on:
-              id: ${hardware_status_led}
+                id: ${hardware_status_led}
                 effect: "Dry Down Status"
             - globals.set:
-              id: hardware_led_target_state
-              value: 'DRY_DOWN'
+                id: hardware_led_target_state
+                value: 'DRY_DOWN'
             # Time conversion for minutes to milliseconds for the delay.
             - delay: !lambda 'return id(dry_down_duration).state * 60000;'
             
@@ -334,8 +334,8 @@ script:
                 value: 'false'
             # Time to switch the LED back off to show we are done with dry down.
             - globals.set:
-              id: hardware_led_target_state
-              value: 'OFF'
+                id: hardware_led_target_state
+                value: 'OFF'
             - light.turn_off: ${hardware_status_led}
             # Add a short delay to ensure the device has time to process the OFF before we reset the flag.    
             - delay: 2s
@@ -349,12 +349,12 @@ script:
                 value: 'false'
             # Update LED to reflect current AC state (AC was turned back on during the delay)
             - light.turn_on:
-              id: ${hardware_status_led}
+                id: ${hardware_status_led}
                 effect: "None"
                 brightness: 100%
             - globals.set:
-              id: hardware_led_target_state
-              value: 'ON'
+                id: hardware_led_target_state
+                value: 'ON'
 
   - id: timer_off_sequence
     mode: restart
