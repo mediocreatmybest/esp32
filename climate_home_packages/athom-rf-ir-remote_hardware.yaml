@@ -13,6 +13,7 @@ substitutions:
   Button_PIN: GPIO0
   LED_PIN: GPIO27
   hardware_description: "Built on Athom RF IR Remote"
+  hardware_status_led: athom_status_led
 
 esphome:
   platformio_options:
@@ -40,6 +41,12 @@ preferences:
 # Hardware Definitions and Sensors
 #=============================================================
 
+globals:
+  # Tracking the LED state so the main climate package can remain hardware-agnostic.
+  - id: hardware_led_target_state
+    type: std::string
+    initial_value: '"OFF"'
+
 remote_receiver:
   - pin:
       number: ${IR_RX_PIN}
@@ -48,7 +55,7 @@ remote_receiver:
         input: true
         pullup: true
     # Remove dump all in future after testing.
-    dump: all
+    # dump: all
     tolerance: 55%
     id: ir_receiver
     

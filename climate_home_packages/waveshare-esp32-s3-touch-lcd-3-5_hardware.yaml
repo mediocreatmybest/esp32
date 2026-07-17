@@ -6,8 +6,8 @@
 substitutions:
   # GPIO Definitions
   IR_RX_PIN: GPIO21 # This needs to be changed if the IR receiver is connected to a different pin
-  IR_TX_PIN: GPIO25 # This needs to be changed if the IR transmitter is connected to a different pin
-  hardware_description: "Built on Waveshare ESP32-S3-Touch-LCD-3.5"
+  IR_TX_PIN: GPIO38 # This needs to be changed if the IR transmitter is connected to a different pin
+  hardware_description: "built_on_waveshare_esp32_s3_touch_lcd_3_5"
   log_level: "DEBUG"
   
 esphome:
@@ -38,6 +38,40 @@ esp32:
 
 preferences:
   flash_write_interval: 1min
+
+#=============================================================
+# Hardware Definitions and Sensors
+#=============================================================
+
+remote_receiver:
+  - pin:
+      number: ${IR_RX_PIN}
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    # Remove dump all in future after testing.
+    dump: all
+    tolerance: 55%
+    id: ir_receiver
+    
+remote_transmitter:
+  - pin:
+      number: ${IR_TX_PIN}
+      inverted: false
+    carrier_duty_percent: 50%
+    non_blocking: true
+    id: ir_transmitter
+
+#=============================================================
+# Hardware LED Status - Placeholder
+#=============================================================
+# We don't have a typical LED status in this hardware, so we need the fallback status light to be a global to allow for the typical behaviour of the main yaml. 
+
+globals:
+  - id: hardware_led_target_state
+    type: std::string
+    initial_value: '"OFF"'
 
 # I2C bus configuration
 i2c:
@@ -101,9 +135,14 @@ touchscreen:
   platform: ft63x6
   id: device_touchscreen
   transform:
-    swap_xy: true
+    swap_xy: false
     mirror_x: false
-    mirror_y: true
+    mirror_y: false
+  calibration:
+    x_min: 0
+    x_max: 320
+    y_min: 0
+    y_max: 480
   on_touch:
     - lambda: |-
           ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",

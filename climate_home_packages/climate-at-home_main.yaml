@@ -12,10 +12,12 @@ substitutions:
   
   # Project Info
   project_name: "Climate at Home"
-  project_version: "v0.1.0"
+  project_version: "v0.2.0"
   
   # Logging
   log_level: "INFO"
+  # Adding a fallback status for devices that do not have a dedicated status LED. 
+  hardware_status_led: hardware_status_led_fallback
   
   # Add Template Climate Overrides
   ac_platform: "mitsubishi"
@@ -59,7 +61,6 @@ climate:
     id: primary_ac
     transmitter_id: ir_transmitter
     receiver_id: ir_receiver
-    # TODO: Add in more dynamic naming based on substitutions for friendly_name and device type. AC, Heater, Fan, etc.
     name: "${name}-${device_type_suffix}"
     supports_heat: ${enable_heat}
     icon: "mdi:air-conditioner"
@@ -80,7 +81,10 @@ climate:
                   - globals.set:
                       id: is_drying_down
                       value: 'false'
-                  - light.turn_off: athom_status_led
+                  - globals.set:
+                      id: hardware_led_target_state
+                      value: '"OFF"'
+                  - light.turn_off: ${hardware_status_led}
 
       # Running Mould Reduction sequence when AC is turned off if the switch is enabled.
       - if:
@@ -102,16 +106,22 @@ climate:
               - lambda: 'return !id(is_drying_down);'
           then:
             - light.turn_on:
-                id: athom_status_led
+                id: ${hardware_status_led}
                 effect: "None"
                 brightness: 100%
+            - globals.set:
+                id: hardware_led_target_state
+                value: '"ON"'
       
       # If the AC is OFF we turn the LED off.
       - if:
           condition:
             lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
           then:
-            - light.turn_off: athom_status_led
+            - globals.set:
+                id: hardware_led_target_state
+                value: '"OFF"'
+            - light.turn_off: ${hardware_status_led}
 
 #===========================================
 # Definitions and Sensors
@@ -175,6 +185,33 @@ globals:
   - id: is_drying_down
     type: bool
     initial_value: 'false'
+
+#===========================================================
+# Fallback Status LED for hardware without a dedicated LED.
+#===========================================================
+
+output:
+  - platform: template
+    id: hardware_status_led_output
+    type: float
+    write_action:
+      - lambda: |-
+          // no-op fallback output
+
+light:
+  - platform: monochromatic
+    name: "Status LED"
+    id: hardware_status_led_fallback
+    output: hardware_status_led_output
+    internal: true
+    restore_mode: ALWAYS_OFF
+    effects:
+      - pulse:
+          name: "Dry Down Status"
+          transition_length: 1s
+          update_interval: 1s
+          min_brightness: 10%
+          max_brightness: 100%
 
 #===========================================================
 # Dropdowns for User UI Settings.
@@ -275,8 +312,11 @@ script:
                 value: 'false'
             # Switch the LED to pulse to show we are in dry down.    
             - light.turn_on:
-                id: athom_status_led
+                id: ${hardware_status_led}
                 effect: "Dry Down Status"
+            - globals.set:
+                id: hardware_led_target_state
+                value: '"DRY_DOWN"'
             # Time conversion for minutes to milliseconds for the delay.
             - delay: !lambda 'return id(dry_down_duration).state * 60000;'
             
@@ -293,7 +333,10 @@ script:
                 id: internal_action
                 value: 'false'
             # Time to switch the LED back off to show we are done with dry down.
-            - light.turn_off: athom_status_led
+            - globals.set:
+                id: hardware_led_target_state
+                value: '"OFF"'
+            - light.turn_off: ${hardware_status_led}
             # Add a short delay to ensure the device has time to process the OFF before we reset the flag.    
             - delay: 2s
             - globals.set:
@@ -306,9 +349,12 @@ script:
                 value: 'false'
             # Update LED to reflect current AC state (AC was turned back on during the delay)
             - light.turn_on:
-                id: athom_status_led
+                id: ${hardware_status_led}
                 effect: "None"
                 brightness: 100%
+            - globals.set:
+                id: hardware_led_target_state
+                value: '"ON"'
 
   - id: timer_off_sequence
     mode: restart
