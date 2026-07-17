@@ -1,0 +1,58 @@
+# Based on https://github.com/esphome/workflows/tree/main/.github/workflows by ESPHome
+name: ESPHome CI
+
+on:
+  # Test any changes before they are merged into main.
+  pull_request:
+    branches:
+      - main
+
+  # Test result after changes are merged into main.
+  push:
+    branches:
+      - main
+
+  # Let's allow the workflow to be run manually from GitHub Actions.
+  workflow_dispatch:
+
+# Only read access is needed at this stage.
+permissions:
+  contents: read
+
+# Cancel older runs when another commit is pushed to the same branch or PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Climate at Home
+
+    # Use a pinned commit from the ESPHome workflows repository.
+    uses: esphome/workflows/.github/workflows/build.yml@efd9e82200a4b90c121516f1e4743887128aebb4
+
+    with:
+      files: |
+        tests/athom-mitsubishi.yaml
+
+      # Pin the ESPHome version to known current version.
+      esphome-version: 2026.7.0
+
+
+  required:
+    name: ESPHome CI required
+    needs:
+      - build
+
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Confirm ESPHome build passed
+        run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            echo "ESPHome build failed."
+            exit 1
+          fi
+
+          echo "ESPHome YAML configuration compiled successfully."
