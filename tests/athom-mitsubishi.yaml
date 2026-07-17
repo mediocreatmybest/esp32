@@ -17,13 +17,14 @@ substitutions:
   room: "Aperture Science Enrichment Center"
   device_description: "Climate at Home CI build"
 
-  # Climate platform and additional options for the Mitsubishi example.
+  # Climate platform for the Mitsubishi example.
   ac_platform: "mitsubishi"
-  enable_heat: "false"
-  enable_fan_only: "true"
+
+  # Climate capabilities
+  climate_supports_heat: "false"
+  climate_supports_fan_only: "true"
 
   # Mitsubishi-specific options
-  supports_fan_only: "true"
   set_fan_mode: "quiet_4levels"
 
   # Wi-Fi settings
@@ -55,7 +56,7 @@ wifi:
 climate:
   - id: !extend primary_ac
     name: "${device_type_suffix}"
-    supports_fan_only: ${supports_fan_only}
+    supports_fan_only: ${climate_supports_fan_only}
     set_fan_mode: ${set_fan_mode}
 
     visual:

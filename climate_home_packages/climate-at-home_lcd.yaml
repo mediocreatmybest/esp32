@@ -240,12 +240,12 @@ script:
     then:
       - if:
           condition:
-            lambda: return !${enable_heat};
+            lambda: return !${climate_supports_heat};
           then:
             - lvgl.widget.hide: heat_button
       - if:
           condition:
-            lambda: return !${enable_fan_only};
+            lambda: return !${climate_supports_fan_only};
           then:
             - lvgl.widget.hide: fan_only_button
 
