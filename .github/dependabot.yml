@@ -3,7 +3,7 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
-    # Schedule updates to weekly.
+    # Schedule updates weekly.
     schedule:
       interval: "weekly"
     # Limit the number of open pull requests to 2. 
