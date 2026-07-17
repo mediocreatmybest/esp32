@@ -21,11 +21,16 @@ These templates aim to make this as simplified as possible and is designed aroun
 - Enable or disable features with YAML packages in main configuration.
   - Home Assistant Bluetooth Proxy (enabled by default)
 
-TODO:
+#### WIP
+
+- Waveshare with Touch LCD
+- Creating a more modular YAML configuration.
+  - Enabling touch display without modifying main climate configurations. e.g., using LVGL with ESPHome with Climate interface.
+  - Enabling additional connectivity options, e.g., Thread, Wi-Fi.
+
+
+#### TODO
 
 - Look into RF Controller or RF proxy options for control of other similar types of devices i.e., Fans.
 - Add optional maintenance pause switch. Pause any inbuilt automations, e.g., cleaning, etc.
-- Look at other hardware, such as Waveshare ESP32 S3 Touch LCD 3.5c.
-- Create more modular YAML configurations
-  - To allow adding in touch display without touching main climate configurations. e.g., using LVGL with ESPHome with Climate interface.
-  - Allow additional connectivity options, e.g., Thread, Wi-Fi.
+- Look at other hardware options. 
