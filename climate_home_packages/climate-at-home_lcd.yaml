@@ -62,9 +62,11 @@ substitutions:
   color_temp_set: "0x51a0e4"
   color_temp_ticks: "0x585858"
 
+# Set priority to -90 to ensure the initialisation sequence is complete before the LCD is updated.
+# https://esphome.io/components/esphome/#on_boot
 esphome:
   on_boot:
-    - priority: -100
+    - priority: -90
       then:
         - delay: 1s
         - script.execute: lcd_apply_capabilities

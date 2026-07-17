@@ -12,7 +12,7 @@ substitutions:
   
   # Project Info
   project_name: "Climate at Home"
-  project_version: "v0.2.0"
+  project_version: "v0.2.1"
   
   # Logging
   log_level: "INFO"
@@ -34,14 +34,16 @@ esphome:
   project:
     name: "${project_name}.${hardware_description}"
     version: ${project_version}
+  
   # Add grace period for global
+  # https://esphome.io/components/esphome/#on_boot
   on_boot:
-    priority: -100 # Run at the end when booting
-    then:
-      - delay: 15s
-      - globals.set:
-          id: boot_grace_period
-          value: 'false'
+    - priority: -100 # Run at the end when booting
+      then:
+        - delay: 15s
+        - globals.set:
+            id: boot_grace_period
+            value: 'false'
 
 ota:
   - platform: esphome

@@ -1,13 +1,13 @@
 # ESP32 Projects
 
-My miscellaneous ESP32 projects and other unfinished related ESP32 ideas.  
+Some of my miscellaneous ESP32 projects that may contain other unfinished related ESP32 thoughts or ideas that I had.  
 I would love to see any pull requests or improvement suggestions.
 
 ## Climate at Home
 
 Climate At Home is a simple, local-first alternative to cloud-based infrared/IR smart climate control.
-This is now a very easy replacement due to [Athom RF IR Remote](https://www.athom.tech/) (and other hardware) and [ESPHome Climate](https://esphome.io/components/climate/).
-These templates aim to make this as simplified as possible and is designed around the assumption that an IR remote will be the primary controller for the AC or heat pump.
+This is now a very easy replacement due to [Athom RF IR Remote](https://www.athom.tech/) (and other ESP32 hardware) and [ESPHome Climate](https://esphome.io/components/climate/).
+These templates aim to make this as simplified as possible with additional timer based features and is designed around the assumption that an IR remote will be the primary controller for the AC or heat pump.
 
 ### Features
 
@@ -28,9 +28,33 @@ These templates aim to make this as simplified as possible and is designed aroun
   - Enabling touch display without modifying main climate configurations. e.g., using LVGL with ESPHome with Climate interface.
   - Enabling additional connectivity options, e.g., Thread, Wi-Fi.
 
-
 #### TODO
 
-- Look into RF Controller or RF proxy options for control of other similar types of devices i.e., Fans.
+- Add RF Controller or at a minimum enable RF proxy options to control other similar types of devices i.e., Fans.
 - Add optional maintenance pause switch. Pause any inbuilt automations, e.g., cleaning, etc.
-- Look at other hardware options. 
+- Look at additional other hardware options.
+
+##### Possible Improvements and/or Issues
+
+- **Eventually look into advanced ESP32 compatibility settings**
+  - The current Athom hardware *(Athom RF IR Remote)* works with `minimum_chip_revision: "3.1"` and enables `sram1_as_iram`.
+  - These settings may cause issues on previous ESP32 revisions or other ESP32 hardware.
+
+- **Cleanup climate substitutions and feature names**
+  - Such as `supports_fan_only` and `enable_fan_only`, etc. to be consistent
+  - Should we move this to the main YAML file, or what is the best method for cleanup tasks. Thoughts? options?  Feel free to jump in and point out where I am wrong!
+
+- **Cleanup climate capabilities, cool, heat, fan, etc.**
+  - The timer and LCD interface currently offer modes such as heat, dry, auto and fan-only, can this be cleaned up and pull directly from the main capabilities of the climate component.
+  - Should optional controls be compiled in and disabled, or able to be removed from the YAML.
+  - How could we make this more modular to avoid one large sprawling logic YAML file, as the timer and mould-reduction features are currently included in the main climate package.
+  
+- **Look at manufacturer-specific settings inside the example or look at additional examples.**
+  - The main example that is in the root directory `climate-at-home.yaml` is the main example YAML, currently configured on Mitsubishi *(As that is what I have...)* devices as an example.
+  - Ideally we would make it clear that some options are device specific e.g., `set_fan_mode`, and `supports_fan_only`.
+  - We could migrate this into device specific examples.
+
+- **Add automated ESPHome validation**
+  - Could we add GitHub Actions checks or compilation of the base package, as this would highlight any merge issues between YAML files.
+  - Suggested configurations include Athom with Mitsubishi, Athom with Bluetooth proxy, a non-Mitsubishi example, and Waveshare with the LCD package.
+  - As we need to catch YAML merge errors, obvious typos, or simple unsupported platform options mixing that might break ESPHome from compiling.
