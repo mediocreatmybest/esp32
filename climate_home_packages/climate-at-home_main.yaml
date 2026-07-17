@@ -12,7 +12,7 @@ substitutions:
   
   # Project Info
   project_name: "Climate at Home"
-  project_version: "v0.1.0"
+  project_version: "v0.2.0"
   
   # Logging
   log_level: "INFO"
