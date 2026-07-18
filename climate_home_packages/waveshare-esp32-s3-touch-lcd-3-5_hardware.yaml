@@ -21,11 +21,10 @@ logger:
 
 debug:
 
-
-
 #=============================================================
 # ESP32-S3 specific configuration
 #=============================================================
+
 esp32:
   board: esp32-s3-devkitc-1
   variant: esp32s3
@@ -137,8 +136,7 @@ display:
     update_interval: never
     invert_colors: true
 
-# We need to look at sleep and wakeup options, based on touch for the moment.
-# Need to confirm touch locations and mirroring. 
+# We need to look at sleep and wakeup options, no wake or sleep options set, should be handled by the main yaml for now.
 touchscreen:
   platform: ft63x6
   id: my_touchscreen
