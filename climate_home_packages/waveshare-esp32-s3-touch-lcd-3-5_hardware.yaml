@@ -21,20 +21,23 @@ logger:
 
 debug:
 
-psram:
-  mode: octal
-  speed: 80MHz
+
 
 #=============================================================
 # ESP32-S3 specific configuration
 #=============================================================
 esp32:
-  variant: esp32s3
   board: esp32-s3-devkitc-1
+  variant: esp32s3
   flash_size: 16MB
   framework:
     type: esp-idf
-    execute_from_psram: true
+    advanced:
+      execute_from_psram: true
+
+psram:
+  mode: octal
+  speed: 80MHz
 
 preferences:
   flash_write_interval: 5min
