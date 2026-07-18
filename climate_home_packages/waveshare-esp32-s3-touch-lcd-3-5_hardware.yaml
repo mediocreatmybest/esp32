@@ -135,7 +135,7 @@ display:
     pixel_mode: 16bit
     auto_clear_enabled: false
     update_interval: never
-    show_test_card: true
+
 
 # We need to look at sleep and wakeup options, based on touch for the moment.
 # Need to confirm touch locations and mirroring. 
