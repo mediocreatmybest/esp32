@@ -138,25 +138,25 @@ display:
 
 # We need to look at sleep and wakeup options, no wake or sleep options set, should be handled by the main yaml for now.
 touchscreen:
-  platform: ft63x6
-  id: my_touchscreen
-  transform:
-    swap_xy: false
-    mirror_x: false
-    mirror_y: false
-  calibration:
-    x_min: 0
-    x_max: 320
-    y_min: 0
-    y_max: 480
-  on_touch:
-    - lambda: |-
-          ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
-              touch.x,
-              touch.y,
-              touch.x_raw,
-              touch.y_raw
-              );
+  - platform: ft63x6
+    id: my_touchscreen
+    transform:
+      swap_xy: false
+      mirror_x: false
+      mirror_y: false
+    calibration:
+      x_min: 0
+      x_max: 320
+      y_min: 0
+      y_max: 480
+    on_touch:
+      - lambda: |-
+            ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
+                touch.x,
+                touch.y,
+                touch.x_raw,
+                touch.y_raw
+                );
 
 button:
   - platform: restart
