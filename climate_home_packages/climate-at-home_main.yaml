@@ -21,8 +21,10 @@ substitutions:
   
   # Add Template Climate Overrides
   ac_platform: "mitsubishi"
-  enable_heat: "false"
-  enable_fan_only: "true"
+
+  # Climate capabilities
+  climate_supports_heat: "false"
+  climate_supports_fan_only: "true"
 
 esphome:
   name: ${name}
@@ -64,7 +66,7 @@ climate:
     transmitter_id: ir_transmitter
     receiver_id: ir_receiver
     name: "${name}-${device_type_suffix}"
-    supports_heat: ${enable_heat}
+    supports_heat: ${climate_supports_heat}
     icon: "mdi:air-conditioner"
     # Set additional conditions for specific modes or switches.
     on_state:
