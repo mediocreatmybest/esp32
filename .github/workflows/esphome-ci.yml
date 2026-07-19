@@ -34,6 +34,8 @@ jobs:
     with:
       files: |
         tests/athom-mitsubishi.yaml
+        tests/athom-mitsubishi_ble.yaml
+        tests/waveshare_touch_remote_mitsubishi.yaml
 
       # Pin the ESPHome version to known current version.
       esphome-version: 2026.7.0
