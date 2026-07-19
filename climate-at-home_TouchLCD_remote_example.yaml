@@ -115,21 +115,40 @@ ota:
 
 light:
   - id: !extend display_backlight
-    restore_mode: ALWAYS_OFF
+    restore_mode: ALWAYS_ON
 
 #=============================================================
-# LVGL
+# LVGL and Display configuration
 #=============================================================
 
 # Defaults to 10MHz may glitch at higher rates. 10MHz / 40MHz / 80MHz
 display:
   - id: !extend my_display
     data_rate: 80MHz
-    
+
+# Simple wake-up on touch.
+touchscreen:
+  - id: !extend my_touchscreen
+    on_release:
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.resume:
+            - lvgl.widget.redraw:
+            - light.turn_on: display_backlight
+
 lvgl:
   # Native portrait orientation: 320 × 480.
   # The climate mode dropdown is too tall for 480 × 320 landscape.
   rotation: 0
+  
+  # Simple 5 minute idle timeout, can be improved with templating in future.
+  on_idle:
+    timeout: 5min
+    then:
+      - light.turn_off: display_backlight
+      - lvgl.pause:
+          show_snow: true
 
   # Recommended when PSRAM is available.
   buffer_size: 12%
