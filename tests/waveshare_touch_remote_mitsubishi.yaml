@@ -1,0 +1,172 @@
+##########################################################################################################
+# Climate at Home - CI test configuration
+#
+# Tested combination:
+#   - Waveshare ESP32-S3 Touch LCD 3.5 hardware package
+#   - Wi-Fi diagnostics package
+#   - External modular LVGL climate remote interface
+#   - Mitsubishi climate capabilities based on the remote yaml configuration
+##########################################################################################################
+
+substitutions:
+  # Test device information
+  name: "waveshare-s3-touch"
+  friendly_name: "Waveshare S3 Touch Mitsubishi"
+  device_type_suffix: "AC"
+  room: "Aperture Science Enrichment Center"
+
+  # Climate defaults and capabilities used by the remote interface.
+  ac_platform: "mitsubishi"
+  enable_heat: "false"
+  enable_fan_only: "true"
+  supports_dry: "true"
+
+  # Wi-Fi settings
+  wifi_fast_connect: "false"
+
+  # Native portrait display dimensions.
+  screen_width: "320"
+  screen_height: "480"
+
+  # External LVGL interface theme.
+  icon_font: mdi_icons_40
+  text_font: nunito_20
+  button_on_color: steel_blue
+  button_off_color: slate_blue_gray
+  icon_on_color: light_blue
+  icon_off_color: misty_blue
+  label_on_color: white
+  label_off_color: misty_blue
+  button_text_color: black
+
+  # GPIO definitions for the optional IR receiver and transmitter.
+  IR_RX_PIN: GPIO21
+  IR_TX_PIN: GPIO38
+
+# Use local project packages so CI validates changes before they are merged.
+packages:
+  waveshare_s3_touch_hardware:
+    !include ../climate_home_packages/waveshare-esp32-s3-touch-lcd-3-5_hardware.yaml
+
+  wifi_diagnostics:
+    !include ../climate_home_packages/climate-at-home_wifi.yaml
+
+  # The example intentionally consumes the external modular LVGL project remotely.
+  # This no doubt will make this more fragile than it should be, including any breaking changes they make.
+  modular_lvgl:
+    url: https://github.com/agillis/esphome-modular-lvgl-buttons
+    ref: main
+    refresh: 0d
+    files:
+      - common/theme/theme_style.yaml
+      - common/theme/color.yaml
+      - common/theme/mdi_glyph_substitutions.yaml
+
+      - path: ui/climate/remote.yaml
+        vars:
+          uid: waveshare_s3_touch_mitsubishi
+          entity_id: climate.athom_mitsubishi_ac
+          row: 0
+          column: 0
+          row_span: 1
+          column_span: 1
+          text: "Mitsubishi AC"
+          icon: $mdi_air_conditioner
+          page_id: main_page
+
+# Overrides applied after the packages have been merged.
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  min_version: 2026.7.0
+
+# Dummy Wi-Fi credentials are sufficient for compilation testing.
+wifi:
+  ssid: "ci-test-network"
+  password: "ci-test-password"
+  fast_connect: "${wifi_fast_connect}"
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+
+# Keep the display enabled after boot for the test configuration.
+light:
+  - id: !extend display_backlight
+    restore_mode: ALWAYS_ON
+
+# Exercise the same display data rate as the working example.
+display:
+  - id: !extend my_display
+    data_rate: 80MHz
+
+# Resume LVGL and restore the backlight when the paused display is touched.
+touchscreen:
+  - id: !extend my_touchscreen
+    on_release:
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.resume:
+            - lvgl.widget.redraw:
+            - light.turn_on: display_backlight
+
+lvgl:
+  # Native portrait orientation: 320 x 480.
+  rotation: 0
+
+  on_idle:
+    timeout: 5min
+    then:
+      - light.turn_off: display_backlight
+      - lvgl.pause:
+          show_snow: true
+
+  buffer_size: 12%
+  refresh_interval: 16ms
+
+  pages:
+    - id: main_page
+      layout: 2x2
+      styles: page_style
+
+# The external project references these font IDs. Remote files keep the CI build
+# compatible with ESPHome Git packages without cloning the dependency locally.
+font:
+  - file: "https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf"
+    id: mdi_icons_40
+    size: 40
+    bpp: 8
+    glyphs:
+      - $mdi_air_conditioner
+      - $mdi_brightness_6
+      - $mdi_chevron_up
+      - $mdi_circle_opacity
+      - $mdi_eyedropper
+      - $mdi_lightbulb
+      - $mdi_arrow_oscillating
+      - $mdi_chevron_left
+      - $mdi_thermostat
+      - $mdi_water_percent
+      - $mdi_information_box
+      - $mdi_ceiling_light
+      - $mdi_fan
+      - $mdi_thermometer
+
+  - file: "https://github.com/agillis/esphome-modular-lvgl-buttons/raw/main/assets/fonts/Nunito-SemiBold.ttf"
+    id: nunito_72
+    size: 72
+    bpp: 8
+
+  - file: "https://github.com/agillis/esphome-modular-lvgl-buttons/raw/main/assets/fonts/Nunito-SemiBold.ttf"
+    id: nunito_24
+    size: 24
+    bpp: 8
+
+  - file: "https://github.com/agillis/esphome-modular-lvgl-buttons/raw/main/assets/fonts/Nunito-SemiBold.ttf"
+    id: nunito_20
+    size: 20
+    bpp: 8

@@ -1,0 +1,72 @@
+##########################################################################################################
+# Climate at Home - CI test configuration
+#
+# Tested combination:
+#   - Climate at Home main package
+#   - Athom RF/IR Remote hardware package
+#   - Wi-Fi diagnostics package
+#   - Mitsubishi climate configuration
+#   - Bluetooth proxy package for the Athom RF/IR Remote hardware package
+#   - More to add in future. Let's start here.
+##########################################################################################################
+
+substitutions:
+  # Test device name
+  name: "athom-mitsubishi"
+  friendly_name: "Athom Mitsubishi"
+  device_type_suffix: "AC"
+  room: "Aperture Science Enrichment Center"
+  device_description: "Climate at Home CI build"
+
+  # Climate platform for the Mitsubishi example.
+  ac_platform: "mitsubishi"
+
+  # Climate capabilities
+  climate_supports_heat: "false"
+  climate_supports_fan_only: "true"
+
+  # Mitsubishi-specific options
+  set_fan_mode: "quiet_4levels"
+
+  # Wi-Fi settings
+  wifi_fast_connect: "false"
+
+# Use local package files to avoid fetching from remote sources that haven't merged, yet, rinse and repeat.
+packages:
+  climate_at_home:
+    !include ../climate_home_packages/climate-at-home_main.yaml
+
+  athom_rf_ir_hardware:
+    !include ../climate_home_packages/athom-rf-ir-remote_hardware.yaml
+
+  wifi_diagnostics:
+    !include ../climate_home_packages/climate-at-home_wifi.yaml
+
+  ble_proxy:
+    !include ../climate_home_packages/athom-rf-ir-remote_bluetooth-proxy.yaml
+
+# Overrides applied after the packages have been merged.
+esphome:
+  name_add_mac_suffix: true
+
+# Dummy Wi-Fi credentials are sufficient for compilation testing.
+# Remember this is just a test for science. Portal science.
+wifi:
+  ssid: "ci-test-network"
+  password: "ci-test-password"
+  fast_connect: "${wifi_fast_connect}"
+
+# Manufacturer-specific Mitsubishi example.
+climate:
+  - id: !extend primary_ac
+    name: "${device_type_suffix}"
+    supports_fan_only: ${climate_supports_fan_only}
+    set_fan_mode: ${set_fan_mode}
+
+    visual:
+      min_temperature: 15.0
+      max_temperature: 30.0
+      temperature_step: 1.0
+
+api:
+  reboot_timeout: 0s
