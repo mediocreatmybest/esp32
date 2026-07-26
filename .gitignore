@@ -1,0 +1,4 @@
+.esphome/
+.venv/
+.vscode/
+*.pyc
