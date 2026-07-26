@@ -1,11 +1,9 @@
 ##########################################################################################################
-# Climate at Home - CI test configuration
+# Climate at Home - Shared Waveshare CI test configuration
 #
-# Tested combination:
-#   - Waveshare ESP32-S3 Touch LCD 3.5 hardware package
-#   - Wi-Fi diagnostics package
-#   - External modular LVGL climate remote interface
-#   - Mitsubishi climate capabilities based on the remote yaml configuration
+# Local and compatibility test entry points include this file after selecting the
+# Climate at Home package paths under test. The external LVGL dependency remains here
+# so both entry points validate the same interface.
 ##########################################################################################################
 
 substitutions:
@@ -43,16 +41,9 @@ substitutions:
   IR_RX_PIN: GPIO21
   IR_TX_PIN: GPIO38
 
-# Use local project packages so CI validates changes before they are merged.
+# The example intentionally consumes the external modular LVGL project remotely.
+# This no doubt will make this more fragile than it should be, including any breaking changes they make.
 packages:
-  waveshare_s3_touch_hardware:
-    !include ../climate_home_packages/waveshare-esp32-s3-touch-lcd-3-5_hardware.yaml
-
-  wifi_diagnostics:
-    !include ../climate_home_packages/climate-at-home_wifi.yaml
-
-  # The example intentionally consumes the external modular LVGL project remotely.
-  # This no doubt will make this more fragile than it should be, including any breaking changes they make.
   modular_lvgl:
     url: https://github.com/agillis/esphome-modular-lvgl-buttons
     ref: main

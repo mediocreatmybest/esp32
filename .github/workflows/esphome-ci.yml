@@ -32,14 +32,18 @@ jobs:
     uses: esphome/workflows/.github/workflows/build.yml@9f6577fd37b5cf773ab1b9be929714a0dcd15661
 
     with:
+      # Compile canonical project paths and the temporary compatibility wrappers.
+      # Compatibility builds can be removed after their documented support period.
       files: |
-        tests/athom-mitsubishi.yaml
-        tests/athom-mitsubishi_ble.yaml
-        tests/waveshare_touch_remote_mitsubishi.yaml
+        projects/climate-at-home/tests/local/athom-mitsubishi.yaml
+        projects/climate-at-home/tests/local/athom-mitsubishi-ble.yaml
+        projects/climate-at-home/tests/local/waveshare-touch-remote-mitsubishi.yaml
+        projects/climate-at-home/tests/compatibility/athom-mitsubishi.yaml
+        projects/climate-at-home/tests/compatibility/athom-mitsubishi-ble.yaml
+        projects/climate-at-home/tests/compatibility/waveshare-touch-remote-mitsubishi.yaml
 
       # Pin the ESPHome version to known current version.
       esphome-version: 2026.7.0
-
 
   required:
     name: ESPHome CI required

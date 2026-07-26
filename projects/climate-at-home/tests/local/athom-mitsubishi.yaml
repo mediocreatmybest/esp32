@@ -1,0 +1,16 @@
+################################################################################
+# Climate at Home - Canonical Athom Mitsubishi Package Test
+################################################################################
+
+packages:
+  climate_at_home:
+    !include ../../packages/legacy/climate-at-home-main.yaml
+
+  athom_rf_ir_hardware:
+    !include ../../packages/hardware/athom-rf-ir-remote.yaml
+
+  wifi_diagnostics:
+    !include ../../packages/features/wifi-diagnostics.yaml
+
+  test_configuration:
+    !include ../common/athom-mitsubishi.yaml

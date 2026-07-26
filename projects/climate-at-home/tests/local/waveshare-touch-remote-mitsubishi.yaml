@@ -1,0 +1,13 @@
+################################################################################
+# Climate at Home - Canonical Waveshare Touch Remote Package Test
+################################################################################
+
+packages:
+  waveshare_s3_touch_hardware:
+    !include ../../packages/hardware/waveshare-esp32-s3-touch-lcd-3-5.yaml
+
+  wifi_diagnostics:
+    !include ../../packages/features/wifi-diagnostics.yaml
+
+  test_configuration:
+    !include ../common/waveshare-touch-remote-mitsubishi.yaml

@@ -1,12 +1,8 @@
 ##########################################################################################################
-# Climate at Home - CI test configuration
+# Climate at Home - Shared Athom Mitsubishi CI test configuration
 #
-# Tested combination:
-#   - Climate at Home main package
-#   - Athom RF/IR Remote hardware package
-#   - Wi-Fi diagnostics package
-#   - Mitsubishi climate configuration
-#   - More to add in future. Let's start here.
+# Local and compatibility test entry points include this file after selecting the
+# package paths under test.
 ##########################################################################################################
 
 substitutions:
@@ -29,17 +25,6 @@ substitutions:
 
   # Wi-Fi settings
   wifi_fast_connect: "false"
-
-# Use local package files to avoid fetching from remote sources that haven't merged, yet, rinse and repeat.
-packages:
-  climate_at_home:
-    !include ../climate_home_packages/climate-at-home_main.yaml
-
-  athom_rf_ir_hardware:
-    !include ../climate_home_packages/athom-rf-ir-remote_hardware.yaml
-
-  wifi_diagnostics:
-    !include ../climate_home_packages/climate-at-home_wifi.yaml
 
 # Overrides applied after the packages have been merged.
 esphome:

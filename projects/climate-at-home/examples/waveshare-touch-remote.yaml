@@ -1,0 +1,211 @@
+#############################################################################################################################################################
+# Climate at Home - Example ESPHome YAML configuration for a climate device using a Waveshare ESP32-S3 3.5" Touch LCD.
+# This example is also using the https://github.com/agillis/esphome-modular-lvgl-buttons/ for the LVGL interface and buttons. (Lets not reinvent the wheel.)
+#############################################################################################################################################################
+
+substitutions:
+  # Device information
+  name: 'livingroom-touchlcd'
+  friendly_name: 'Waveshare Touch Display'
+  device_type_suffix: 'AC'
+  room: 'livingroom'
+
+  # Climate defaults and model
+  ac_platform: 'mitsubishi'
+  enable_heat: 'false'
+  enable_fan_only: 'true'
+  supports_dry: 'true'
+
+  # Wi-Fi settings
+  wifi_fast_connect: 'false'
+
+  # Native portrait display dimensions currently vertical.
+  screen_width: '320'
+  screen_height: '480'
+
+  # External LVGL interface theme for esphome-modular-lvgl-buttons project. See Theme Colours https://github.com/agillis/esphome-modular-lvgl-buttons/tree/main#theme
+  # Note: This example is building from the remote Git repository, so this example is using remote fonts and theme yamls.
+  icon_font: mdi_icons_40
+  text_font: nunito_20
+  button_on_color: steel_blue
+  button_off_color: slate_blue_gray
+  icon_on_color: light_blue
+  icon_off_color: misty_blue
+  label_on_color: white
+  label_off_color: misty_blue
+  button_text_color: black
+  # GPIO Definitions # Place holder if you want to install an IR receiver and transmitter.
+  IR_RX_PIN: GPIO21 # This needs to be changed if the IR receiver is connected to a different pin
+  IR_TX_PIN: GPIO38 # This needs to be changed if the IR transmitter is connected to a different pin
+
+#=============================================================
+# Packages
+#=============================================================
+
+packages:
+  # Climate at Home packages / Hardware / Wi-Fi
+  climate_at_home:
+    url: https://github.com/mediocreatmybest/esp32
+    ref: main
+    refresh: 0d
+    files:
+      # - projects/climate-at-home/packages/legacy/climate-at-home-main.yaml # We can omit this if we are already using the climate at home package on the target device.
+      - projects/climate-at-home/packages/hardware/waveshare-esp32-s3-touch-lcd-3-5.yaml
+      - projects/climate-at-home/packages/features/wifi-diagnostics.yaml
+
+  # Building with the external modular LVGL buttons interface
+  modular_lvgl:
+    url: https://github.com/agillis/esphome-modular-lvgl-buttons
+    ref: main
+    refresh: 0d
+    files:
+      # Theme components loaded separately so we can provide the fonts below.
+      - common/theme/theme_style.yaml
+      - common/theme/color.yaml
+      - common/theme/mdi_glyph_substitutions.yaml
+
+      # Using remote yaml to target an existing HAOS climate entity, that is already using the climate at home package.
+      # The alternative is to use a local.yaml file, and build the climate at home package into this device.
+      - path: ui/climate/remote.yaml
+        vars:
+          uid: livingroom_remote_ac # Unique ID for this remote interface.
+          entity_id: climate.livingroom_ac # The climate entity ID from HAOS.
+          row: 0
+          column: 0
+          row_span: 1
+          column_span: 1
+          text: 'Livingroom AC'
+          icon: $mdi_air_conditioner
+          page_id: main_page
+
+#=============================================================
+# Device configuration
+#=============================================================
+
+esphome:
+  name_add_mac_suffix: false
+  min_version: 2026.7.0
+
+#=============================================================
+# Wi-Fi
+#=============================================================
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: '${wifi_fast_connect}'
+
+#=============================================================
+# Home Assistant API
+#=============================================================
+
+api:
+  reboot_timeout: 0s
+
+#=============================================================
+# Over-the-Air Updates
+#=============================================================
+
+ota:
+  - platform: esphome
+
+#=============================================================
+# Backlight override / ALWAYS_OFF / ALWAYS_ON
+#=============================================================
+
+light:
+  - id: !extend display_backlight
+    restore_mode: ALWAYS_ON
+
+#=============================================================
+# LVGL and Display configuration
+#=============================================================
+
+# Defaults to 10MHz may glitch at higher rates. 10MHz / 40MHz / 80MHz
+display:
+  - id: !extend my_display
+    data_rate: 80MHz
+
+# Simple wake-up on touch.
+touchscreen:
+  - id: !extend my_touchscreen
+    on_release:
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.resume:
+            - lvgl.widget.redraw:
+            - light.turn_on: display_backlight
+
+lvgl:
+  # Native portrait orientation: 320 × 480.
+  # The climate mode dropdown is too tall for 480 × 320 landscape.
+  rotation: 0
+
+  # Simple 5 minute idle timeout, can be improved with templating in future.
+  on_idle:
+    timeout: 5min
+    then:
+      - light.turn_off: display_backlight
+      - lvgl.pause:
+          show_snow: true
+
+  # Recommended when PSRAM is available.
+  buffer_size: 12%
+
+  # ESPHome default is 16 ms; retained for testing.
+  refresh_interval: 16ms
+
+  pages:
+    - id: main_page
+      layout: 2x2
+      styles: page_style
+
+#=============================================================
+# Fonts
+#=============================================================
+
+# The external project references these font IDs, but its bundled font path assumes
+# that the project is being cloned locally. Pulling in the remote files here keeps
+# this build compatible with ESPHome remote Git packages and modular LVGL buttons project.
+
+font:
+  # Material Design icons
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: mdi_icons_40
+    size: 40
+    bpp: 8
+    glyphs:
+      - $mdi_air_conditioner
+      - $mdi_brightness_6
+      - $mdi_chevron_up
+      - $mdi_circle_opacity
+      - $mdi_eyedropper
+      - $mdi_lightbulb
+      - $mdi_arrow_oscillating
+      - $mdi_chevron_left
+      - $mdi_thermostat
+      - $mdi_water_percent
+      - $mdi_information_box
+      # Tile icons
+      - $mdi_ceiling_light
+      - $mdi_fan
+      - $mdi_thermometer
+
+  # Climate detail target temperature
+  - file: 'https://github.com/agillis/esphome-modular-lvgl-buttons/raw/main/assets/fonts/Nunito-SemiBold.ttf'
+    id: nunito_72
+    size: 72
+    bpp: 8
+
+  # Climate detail current temperature
+  - file: 'https://github.com/agillis/esphome-modular-lvgl-buttons/raw/main/assets/fonts/Nunito-SemiBold.ttf'
+    id: nunito_24
+    size: 24
+    bpp: 8
+
+  # Tile labels, menus and interface text
+  - file: 'https://github.com/agillis/esphome-modular-lvgl-buttons/raw/main/assets/fonts/Nunito-SemiBold.ttf'
+    id: nunito_20
+    size: 20
+    bpp: 8

@@ -1,0 +1,21 @@
+################################################################################
+# Climate at Home - Legacy Athom Mitsubishi and Bluetooth Package Path Test
+################################################################################
+#
+# These root package paths are public compatibility contracts during migration.
+
+packages:
+  climate_at_home:
+    !include ../../../../climate_home_packages/climate-at-home_main.yaml
+
+  athom_rf_ir_hardware:
+    !include ../../../../climate_home_packages/athom-rf-ir-remote_hardware.yaml
+
+  wifi_diagnostics:
+    !include ../../../../climate_home_packages/climate-at-home_wifi.yaml
+
+  ble_proxy:
+    !include ../../../../climate_home_packages/athom-rf-ir-remote_bluetooth-proxy.yaml
+
+  test_configuration:
+    !include ../common/athom-mitsubishi.yaml

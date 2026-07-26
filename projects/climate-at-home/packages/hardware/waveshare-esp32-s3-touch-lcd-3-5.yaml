@@ -1,0 +1,178 @@
+#=================================================================
+# Climate At Home - Hardware Template ESP32-S3-Touch-LCD-3.5 - WIP
+#=================================================================
+# Hardware - https://docs.waveshare.com/ESP32-S3-Touch-LCD-3.5
+# https://github.com/agillis/esphome-modular-lvgl-buttons/blob/main/hardware/waveshare-esp32-s3-touch-lcd-3.5.yaml
+#
+# Package path:
+# projects/climate-at-home/packages/hardware/waveshare-esp32-s3-touch-lcd-3-5.yaml
+
+substitutions:
+  # GPIO Definitions
+  IR_RX_PIN: GPIO21 # This needs to be changed if the IR receiver is connected to a different pin
+  IR_TX_PIN: GPIO38 # This needs to be changed if the IR transmitter is connected to a different pin
+  hardware_description: 'built_on_waveshare_esp32_s3_touch_lcd_3_5'
+  log_level: 'INFO'
+
+esphome:
+  name: waveshare-esp32-s3-touch-35
+  friendly_name: WaveShare ESP32-S3 Touch LCD 3.5
+  min_version: 2026.7.0
+
+logger:
+  level: ${log_level}
+
+debug:
+
+#=============================================================
+# ESP32-S3 specific configuration
+#=============================================================
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    advanced:
+      execute_from_psram: true
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+preferences:
+  flash_write_interval: 5min
+
+#=============================================================
+# Hardware Definitions and Sensors
+#=============================================================
+
+remote_receiver:
+  - pin:
+      number: ${IR_RX_PIN}
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    # Remove dump all in future after testing.
+    # dump: all
+    tolerance: 55%
+    id: ir_receiver
+
+remote_transmitter:
+  - pin:
+      number: ${IR_TX_PIN}
+      inverted: false
+    carrier_duty_percent: 50%
+    non_blocking: true
+    id: ir_transmitter
+
+#=============================================================
+# Hardware LED Status - Placeholder
+#=============================================================
+# We don't have a typical LED status in this hardware, so we need the fallback status light to be a global to allow for the typical behaviour of the main yaml.
+
+globals:
+  - id: hardware_led_target_state
+    type: std::string
+    initial_value: '"OFF"'
+
+# I2C bus configuration
+i2c:
+  - id: i2c_bus
+    sda: 8
+    scl: 7
+    scan: true
+    frequency: 400kHz
+
+# PCA9554 GPIO extender for display reset
+pca9554:
+  - id: p_c_a
+    address: 0x20
+    i2c_id: i2c_bus
+
+# Backlight PWM output and light component
+output:
+  # Backlight LED
+  - platform: ledc
+    pin: GPIO06
+    id: backlight_pwm
+    frequency: 5kHz
+    channel: 0
+
+light:
+  - platform: monochromatic
+    output: backlight_pwm
+    name: Display Backlight
+    id: display_backlight
+    restore_mode: ALWAYS_OFF
+    gamma_correct: 1
+
+spi:
+  id: lcd_spi
+  clk_pin: GPIO05
+  mosi_pin: GPIO01
+  miso_pin: GPIO02
+
+# We need to use the mipi_spi due to deprecation of previous drivers.
+# Note: Removal of any rotation or mirroring when using LVGL in display driver.
+display:
+  - platform: mipi_spi
+    model: st7796
+    id: my_display
+    dimensions:
+      width: 320
+      height: 480
+    spi_id: lcd_spi
+    cs_pin:
+      pca9554: p_c_a
+      number: 2
+    dc_pin: 3
+    reset_pin:
+      pca9554: p_c_a
+      number: 1
+    spi_mode: 1
+    color_order: bgr
+    pixel_mode: 16bit
+    auto_clear_enabled: false
+    update_interval: never
+    invert_colors: true
+
+# We need to look at sleep and wakeup options, no wake or sleep options set, should be handled by the main yaml for now.
+touchscreen:
+  - platform: ft63x6
+    id: my_touchscreen
+    transform:
+      swap_xy: false
+      mirror_x: false
+      mirror_y: false
+    calibration:
+      x_min: 0
+      x_max: 320
+      y_min: 0
+      y_max: 480
+    on_touch:
+      - lambda: |-
+          ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
+              touch.x,
+              touch.y,
+              touch.x_raw,
+              touch.y_raw
+              );
+
+button:
+  - platform: restart
+    icon: mdi:power-cycle
+    name: 'Restart'
+    entity_category: 'config'
+
+  - platform: factory_reset
+    disabled_by_default: true
+    name: 'Factory Reset'
+    id: factory_reset_all
+    entity_category: 'config'
+
+# Special LVGL settings required for this display / Based on esphome-modular-lvgl-buttons hardware.
+lvgl:
+  rotation: ${rotation | default("90")}

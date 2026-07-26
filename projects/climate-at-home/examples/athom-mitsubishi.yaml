@@ -1,0 +1,82 @@
+#################################################################################################################################################
+# Climate at Home - Example ESPHome YAML configuration for a climate device using an Athom RF IR Remote device for the Mitsubishi AC platform.
+#################################################################################################################################################
+
+substitutions:
+  #  Device Info for overrides.
+  name: 'living-room'
+  # Entity Name Suffix for Climate device.
+  device_type_suffix: 'AC' # e.g. "AC", "HeatPump", "Heater", "Fan", etc.
+  # Friendly name for the device, used in Home Assistant.
+  friendly_name: 'Living Room'
+  room: 'Lounge'
+
+  # Set climate defaults and device model
+  # https://esphome.io/components/climate/
+  # https://esphome.io/components/climate/climate_ir/ - List of supported platforms
+
+  # Mitsubishi Example
+  ac_platform: 'mitsubishi'
+
+  # Climate capabilities describe additional modes supported by the AC or climate component.
+  # e.g. Heatpump.
+  climate_supports_heat: 'false'
+  # e.g. Fan only mode.
+  climate_supports_fan_only: 'true'
+
+  # Mitsubishi-specific fan option
+  set_fan_mode: quiet_4levels
+
+  # WiFi Settings
+  wifi_fast_connect: 'false'
+
+# Packages used to build Climate at Home.
+# Using examples from: https://esphome.io/components/packages/
+packages:
+  remote_file_packages:
+    url: https://github.com/mediocreatmybest/esp32
+    ref: main # The main branch of this repository.
+    refresh: 0d # optional number in days, e.g. 0 for always refresh, 1 for daily, 7 for weekly, etc.
+    files:
+      # Main Climate at Home Package (required)
+      - projects/climate-at-home/packages/legacy/climate-at-home-main.yaml
+
+      # Hardware template package for Athom RF IR Remote Climate. (a hardware template is required)
+      - projects/climate-at-home/packages/hardware/athom-rf-ir-remote.yaml
+
+      ################################################################################
+      # Comment out any feature packages that are not wanted or needed in the build. #
+      ################################################################################
+
+      # Bluetooth Proxy Package, enabling Bluetooth proxy support.
+      - projects/climate-at-home/packages/features/athom-bluetooth-proxy.yaml
+
+      # Wi-Fi sensors, can be removed if you are using Thread for example.
+      - projects/climate-at-home/packages/features/wifi-diagnostics.yaml
+
+# Defaulting to false to avoid trailing suffix on device names.
+esphome:
+  name_add_mac_suffix: false
+
+# WiFi configuration
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: '${wifi_fast_connect}'
+
+# Some settings are device specific for configurations. eg. Mitsubishi
+climate:
+  - id: !extend primary_ac
+    # name: ${name}-${device_type_suffix} # e.g. "living-room-AC"
+    name: '${device_type_suffix}' # Alternative option to use only the device type suffix for the climate entity name.
+    supports_fan_only: ${climate_supports_fan_only}
+    set_fan_mode: ${set_fan_mode}
+    # Optional visual block for haos cards.
+    visual:
+      min_temperature: 15.0
+      max_temperature: 30.0
+      temperature_step: 1.0
+
+# https://esphome.io/components/api/
+api:
+  reboot_timeout: 0s
