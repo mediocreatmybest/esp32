@@ -6,11 +6,13 @@ on:
   pull_request:
     branches:
       - main
+      - dev
 
   # Test result after changes are merged into main.
   push:
     branches:
       - main
+      - dev
 
   # Let's allow the workflow to be run manually from GitHub Actions.
   workflow_dispatch:
@@ -43,7 +45,7 @@ jobs:
         projects/climate-at-home/tests/compatibility/waveshare-touch-remote-mitsubishi.yaml
 
       # Pin the ESPHome version to known current version.
-      esphome-version: 2026.7.0
+      esphome-version: 2026.7.2
 
   required:
     name: ESPHome CI required
