@@ -1,6 +1,6 @@
 # Climate at Home packages
 
-This directory contains our ESPHome YAML packages to implement Climate at Home.
+This directory contains the ESPHome YAML packages to implement Climate at Home.
 
 ## Directories
 
@@ -12,10 +12,16 @@ This directory contains our ESPHome YAML packages to implement Climate at Home.
 
 The planned directories include `base/`, `climate/`, `display/`, and `projects/`.
 
-New configurations will eventually import one file from `projects/`.
-Until those are available and working, the maintained examples will use the files directly.
+The hardware and optional connectivity packages have been moved into this directory.
+The climate core, timer, mould-reduction behaviour and common services are still
+combined under `legacy/`.
+
+New configurations will eventually import one supported manifest from `projects/`.
+Until those manifests are available and working, the maintained examples compose the
+current packages directly.
 
 The root `climate_home_packages/` directory contains compatibility wrappers for my existing
-remote installs. Once the new layout is functional, this too will be removed.
+remote installs. These wrappers will remain for at least one published release after the
+replacement project manifests are introduced.
 
 Remote packages do not read user secrets. So all Wi-Fi credentials and API encryption remain in the local ESPHome build configuration.
