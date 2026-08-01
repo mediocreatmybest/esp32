@@ -21,7 +21,7 @@ These templates aim to make this as simplified as possible with additional timer
 - Bluetooth proxy as an optional package.
 
 The timer and mould-reduction controls can be enabled or disabled by the user,
-but are are currently still compiled together in `packages/legacy/climate-at-home-main.yaml`.
+but are currently still compiled together in `packages/legacy/climate-at-home-main.yaml`.
 
 ## Current architecture state
 
