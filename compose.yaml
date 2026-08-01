@@ -1,0 +1,20 @@
+# Shared ESPHome dev environment
+# Keeping this image version aligned with `.github/workflows/esphome-ci.yml`.
+name: esp32-development
+
+services:
+  esphome:
+    image: esphome/esphome:2026.7.2
+    init: true
+    working_dir: /config
+    command:
+      - dashboard
+      - /config
+    ports:
+      # Keep the unauthenticated development dashboard on this computer only.
+      - '127.0.0.1:6052:6052'
+    volumes:
+      - type: bind
+        source: .
+        target: /config
+    restart: unless-stopped
