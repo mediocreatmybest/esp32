@@ -11,37 +11,49 @@ These templates aim to make this as simplified as possible with additional timer
 - [Packages](packages/)
 - [Tests](tests/)
 
-## Features
+## Current features
 
-- Local-first AC control through Home Assistant and ESPHome
-- IR-based climate control with state tracking (This does depend on the climate platform being used)
-- Configurable AC platform/model settings (for example; Mitsubishi, Daikin, etc.)
-- Optional mould-reduction or dry-down cycle with timer when an AC that is cooling is turned off
-- Optional simplified timer for ON or OFF after a set period of time (disabled by default).
-  - If the device is OFF the auto timer will switch the device ON
-  - If the device is ON the auto timer will switch the device OFF
-- Enable or disable features with YAML packages in main configuration.
-  - Home Assistant Bluetooth Proxy (enabled by default)
+- Local-first AC control through Home Assistant and ESPHome.
+- IR-based climate control with state tracking. _The available state depends on the selected ESPHome climate platform._
+- Mould-reduction and automatic ON/OFF timer controls in the current combined climate package.
+- A touch interface using the external modular LVGL buttons interface.
+- Wi-Fi diagnostic sensors as an optional package.
+- Bluetooth proxy as an optional package.
+
+The timer and mould-reduction controls can be enabled or disabled by the user,
+but are are currently still compiled together in `packages/legacy/climate-at-home-main.yaml`.
+
+## Current architecture state
+
+| Area                 | Current state                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| Hardware             | Athom, Waveshare, and eventually other hardware to live under `packages/hardware/` |
+| Connectivity         | Wi-Fi diagnostics and Bluetooth proxy live under `packages/features/`              |
+| Climate behaviour    | Climate core, timer and mould reduction remain in the combined legacy package      |
+| Display behaviour    | Waveshare LVGL behaviour still needs separating from display hardware              |
+| Project descriptions | Planned; maintained examples currently compose packages directly                   |
+| Remote builds        | Compatibility paths are tested; clean remote-manifest tests are planned            |
+| Development          | Local Docker testing and remote CI use the same pinned ESPHome version             |
 
 ## Configuration naming
 
 - `climate_supports_*` describes additional capabilities supported by the AC or climate component.
 - `enable_*` is being reserved for optional Climate at Home features.
-- ESPHome component properties keep their correct naming convention from ESPHome, such as `supports_heat:` and `supports_fan_only:`.
+- ESPHome component properties now keep their correct naming convention from ESPHome, such as `supports_heat:` and `supports_fan_only:`.
 
 ### Work in progress
 
-- Waveshare with Touch LCD
-- Creating a more modular YAML configuration.
-  - Enabling touch display without modifying main climate configurations. e.g., using LVGL with ESPHome with Climate interface.
-  - Enabling additional connectivity options, e.g., Thread, Wi-Fi.
+- Hardware testing and interface refinement for the Touch LCD.
+- Separating the shared device base, climate core, optional climate behaviour and display behaviour into smaller more manageable YAML packages.
+- Adding project descriptions so each tested device can be imported through one remote package path.
+- Adding clean-cache remote tests for potential release tags.
 
-### Planned work
+### Planned
 
 - Add RF Controller or at a minimum enable RF proxy options to control other similar types of devices i.e., Fans.
 - Add optional maintenance pause switch. Pause any inbuilt automations, e.g., cleaning, etc.
 - Look at additional hardware options.
-- Find additional examples of climate interfaces with LVGL
+- Find additional examples of climate interfaces with LVGL, as I don't want to reinvent the wheel and others will no doubt do a better job than me.
 
 ### Possible improvements and issues
 
@@ -57,7 +69,7 @@ These templates aim to make this as simplified as possible with additional timer
 - **Look at manufacturer-specific settings inside the example or look at additional examples.**
   - The maintained example at `examples/athom-mitsubishi.yaml` is currently configured for Mitsubishi devices _(as that is what I have)_.
   - Options such as `set_fan_mode` and the ESPHome property `supports_fan_only:` are Mitsubishi-specific in this example. The property receives its value from the shared `climate_supports_fan_only` capability substitution.
-  - We should add device specific examples.
+  - We should add more useful device specific examples.
 
 - **Anything elsE?.**
   - Feel free to make any suggestions, improvements, or pull requests, etc.
