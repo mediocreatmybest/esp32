@@ -1,4 +1,6 @@
 .esphome/
 .venv/
 .vscode/
+ignoreme*
 *.pyc
+.device-builder*

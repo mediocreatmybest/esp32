@@ -9,8 +9,7 @@ The test layout separates shared device settings from the package paths being te
 | `compatibility/` | Previous root package paths retained for my existing remote installs, this will eventually be removed |
 | `remote/`        | Planned clean-cache tests of Git packages                                                             |
 
-Files in `common/` are included by another test entry point and are not validated
-directly.
+Files in `common/` are included by another test entry point and are not validated directly.
 
 Both `local/` and `compatibility/` currently cover:
 
@@ -18,11 +17,15 @@ Both `local/` and `compatibility/` currently cover:
 - Athom with Mitsubishi climate and Bluetooth proxy.
 - Waveshare touch remote with the external modular LVGL interface.
 
-Run ESPHome validation through Docker from the repository root. For example:
+Run ESPHome validation through Docker Compose from the repository root:
 
-```powershell
-docker run --rm --mount "type=bind,source=C:\Extras\git\esp32,target=/config" esphome/esphome:latest config projects/climate-at-home/tests/local/athom-mitsubishi.yaml
+```bash
+docker compose run --rm --no-deps esphome config projects/climate-at-home/tests/local/athom-mitsubishi.yaml
 ```
 
-The Waveshare configuration currently emits the documented GPIO3 strapping-pin warning
-and the external LVGL package's legacy `transparency_key` redaction warning.
+Replace the final path with each entry point under `local/` and `compatibility/` when changing shared packages or package composition.
+GitHub Actions compiles the complete supported matrix.
+
+## Output Warnings
+
+The Waveshare configuration currently emits the standard GPIO3 strapping-pin warning and the external LVGL package's deprecation `transparency_key` warning.
