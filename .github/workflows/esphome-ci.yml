@@ -34,11 +34,16 @@ jobs:
     uses: esphome/workflows/.github/workflows/build.yml@9f6577fd37b5cf773ab1b9be929714a0dcd15661
 
     with:
-      # Compile canonical project paths and the temporary compatibility wrappers.
+      # Compile canonical projects, their independently selectable climate layers,
+      # and the temporary compatibility wrappers.
       # Compatibility builds can be removed after their documented support period.
       files: |
         projects/climate-at-home/tests/local/athom-mitsubishi.yaml
         projects/climate-at-home/tests/local/athom-mitsubishi-ble.yaml
+        projects/climate-at-home/tests/local/athom-mitsubishi-core.yaml
+        projects/climate-at-home/tests/local/athom-mitsubishi-core-fallback.yaml
+        projects/climate-at-home/tests/local/athom-mitsubishi-timer.yaml
+        projects/climate-at-home/tests/local/athom-mitsubishi-anti-mould.yaml
         projects/climate-at-home/tests/local/waveshare-touch-remote-mitsubishi.yaml
         projects/climate-at-home/tests/compatibility/athom-mitsubishi.yaml
         projects/climate-at-home/tests/compatibility/athom-mitsubishi-ble.yaml

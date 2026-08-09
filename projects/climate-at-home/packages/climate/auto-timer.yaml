@@ -1,0 +1,146 @@
+#===========================================
+# Climate At Home - Automatic ON/OFF Timer
+#===========================================
+#
+# ESPHome merges package components by ID and concatenates other lists. Extending
+# `primary_ac` here keeps the timer separate from the core climate package.
+# https://esphome.io/components/packages/
+#
+# Package path:
+# projects/climate-at-home/packages/climate/auto-timer.yaml
+
+switch:
+  - platform: template
+    name: 'Timer'
+    id: switch_auto_timer
+    icon: 'mdi:timer-outline'
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    disabled_by_default: true
+    turn_on_action:
+      - if:
+          # If the AC is OFF, run through the ON sequence.
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - script.execute: timer_on_sequence
+          # If the AC is ON, run through the OFF sequence.
+          else:
+            - script.execute: timer_off_sequence
+    turn_off_action:
+      # Stop both script sequences.
+      - script.stop: timer_on_sequence
+      - script.stop: timer_off_sequence
+
+select:
+  - platform: template
+    name: 'Timer ON Mode'
+    id: timer_on_mode
+    icon: 'mdi:air-conditioner'
+    entity_category: 'config'
+    options:
+      - 'COOL'
+      - 'HEAT'
+      - 'FAN_ONLY'
+      - 'DRY'
+      - 'AUTO'
+    initial_option: 'COOL'
+    optimistic: true
+    restore_value: true
+
+number:
+  - platform: template
+    name: 'Timer (On⁄Off)'
+    id: timer_duration
+    icon: 'mdi:timer-cog-outline'
+    entity_category: 'config'
+    unit_of_measurement: 'min'
+    min_value: 10
+    max_value: 240
+    step: 10
+    initial_value: 90
+    optimistic: true
+    restore_value: true
+
+script:
+  - id: timer_off_sequence
+    mode: restart
+    then:
+      # Using the single slider for delay / Time conversion for minutes to milliseconds.
+      - delay: !lambda 'return id(timer_duration).state * 60000;'
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+          then:
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: 'OFF'
+            - delay: 500ms
+            - globals.set:
+                id: internal_action
+                value: 'false'
+      - switch.turn_off: switch_auto_timer
+
+  - id: timer_on_sequence
+    mode: restart
+    then:
+      # Using the single slider for delay / Time conversion for minutes to milliseconds.
+      - delay: !lambda 'return id(timer_duration).state * 60000;'
+      - globals.set:
+          id: internal_action
+          value: 'true'
+      # Check the dropdown state and apply the correct mode.
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).current_option() == "COOL";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: 'COOL'
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).current_option() == "HEAT";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: 'HEAT'
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).current_option() == "FAN_ONLY";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: 'FAN_ONLY'
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).current_option() == "DRY";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: 'DRY'
+      - if:
+          condition:
+            lambda: 'return id(timer_on_mode).current_option() == "AUTO";'
+          then:
+            - climate.control:
+                id: primary_ac
+                mode: 'AUTO'
+      # We should buffer for state update between mode changes.
+      - delay: 500ms
+      - globals.set:
+          id: internal_action
+          value: 'false'
+      - switch.turn_off: switch_auto_timer
+
+climate:
+  - id: !extend primary_ac
+    on_state:
+      # A real user action cancels a pending timer. Internal timer actions do not.
+      - if:
+          condition:
+            lambda: 'return !id(internal_action);'
+          then:
+            - switch.turn_off: switch_auto_timer

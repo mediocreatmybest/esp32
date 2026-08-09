@@ -1,0 +1,11 @@
+#===============================================
+# Climate At Home - Waveshare Touch Remote Project
+#===============================================
+#
+# Package path:
+# projects/climate-at-home/packages/projects/waveshare-touch-remote.yaml
+
+packages:
+  device_base: !include ../base/device.yaml
+  waveshare_s3_touch_hardware: !include ../hardware/waveshare-esp32-s3-touch-lcd-3-5.yaml
+  wifi_diagnostics: !include ../features/wifi-diagnostics.yaml

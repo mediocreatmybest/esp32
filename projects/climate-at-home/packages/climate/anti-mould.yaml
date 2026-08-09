@@ -1,0 +1,133 @@
+#===========================================
+# Climate At Home - Mould Reduction
+#===========================================
+#
+# ESPHome merges package components by ID and concatenates other lists. Extending
+# `primary_ac` here keeps mould reduction independently selectable from the core.
+# https://esphome.io/components/packages/
+#
+# Package path:
+# projects/climate-at-home/packages/climate/anti-mould.yaml
+
+switch:
+  - platform: template
+    name: 'Mould Reduction'
+    id: switch_anti_mould
+    icon: 'mdi:weather-windy'
+    entity_category: 'config'
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+number:
+  - platform: template
+    name: 'Mould Reduction Timer'
+    id: dry_down_duration
+    icon: 'mdi:timer-outline'
+    entity_category: 'config'
+    unit_of_measurement: 'min'
+    min_value: 5
+    max_value: 30
+    step: 5
+    initial_value: 10
+    optimistic: true
+    restore_value: true
+
+  - platform: template
+    name: 'Mould Reduction Delay'
+    id: dry_down_delay
+    icon: 'mdi:timer-sand'
+    entity_category: 'config'
+    unit_of_measurement: 's'
+    min_value: 0
+    max_value: 90
+    step: 5
+    initial_value: 30
+    optimistic: true
+    restore_value: true
+
+script:
+  - id: dry_down_sequence
+    mode: restart
+    then:
+      - globals.set:
+          id: is_drying_down
+          value: 'true'
+      # User set delay, set by number slider in HAOS. Convert seconds to milliseconds.
+      - delay: !lambda 'return id(dry_down_delay).state * 1000;'
+      # Check the AC is still off, otherwise leave the flag tidy and get out.
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: 'FAN_ONLY'
+            - delay: 500ms
+            - globals.set:
+                id: internal_action
+                value: 'false'
+            - globals.set:
+                id: climate_status_target
+                value: '"DRY_DOWN"'
+            - script.execute: climate_status_indicator_update
+            # Convert minutes to milliseconds for the delay.
+            - delay: !lambda 'return id(dry_down_duration).state * 60000;'
+            - globals.set:
+                id: internal_action
+                value: 'true'
+            - climate.control:
+                id: primary_ac
+                mode: 'OFF'
+            - delay: 500ms
+            - globals.set:
+                id: internal_action
+                value: 'false'
+            - globals.set:
+                id: climate_status_target
+                value: '"OFF"'
+            - script.execute: climate_status_indicator_update
+            - delay: 2s
+            - globals.set:
+                id: is_drying_down
+                value: 'false'
+          else:
+            - globals.set:
+                id: is_drying_down
+                value: 'false'
+            - globals.set:
+                id: climate_status_target
+                value: '"ON"'
+            - script.execute: climate_status_indicator_update
+
+climate:
+  - id: !extend primary_ac
+    on_state:
+      # Manual changes interrupt dry down, then restore the normal climate status.
+      - if:
+          condition:
+            and:
+              - lambda: 'return !id(internal_action);'
+              - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+          then:
+            - script.stop: dry_down_sequence
+            - globals.set:
+                id: is_drying_down
+                value: 'false'
+            - globals.set:
+                id: climate_status_target
+                value: '"ON"'
+            - script.execute: climate_status_indicator_update
+
+      # Run mould reduction when the AC is turned off and the user enabled it.
+      - if:
+          condition:
+            and:
+              - lambda: 'return !id(boot_grace_period);'
+              - lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return id(switch_anti_mould).state;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            - script.execute: dry_down_sequence

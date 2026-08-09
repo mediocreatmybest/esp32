@@ -1,0 +1,14 @@
+#===========================================
+# Climate At Home - No-op Status Indicator
+#===========================================
+#
+# Package path:
+# projects/climate-at-home/packages/features/status-indicator-fallback.yaml
+
+# Projects without an indicator select this instead of the climate package making one up.
+script:
+  - id: climate_status_indicator_update
+    mode: restart
+    then:
+      - lambda: |-
+          // No indicator selected. The climate status is still available for later use.

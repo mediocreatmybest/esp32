@@ -12,15 +12,6 @@ substitutions:
   IR_RX_PIN: GPIO21 # This needs to be changed if the IR receiver is connected to a different pin
   IR_TX_PIN: GPIO38 # This needs to be changed if the IR transmitter is connected to a different pin
   hardware_description: 'built_on_waveshare_esp32_s3_touch_lcd_3_5'
-  log_level: 'INFO'
-
-esphome:
-  name: waveshare-esp32-s3-touch-35
-  friendly_name: WaveShare ESP32-S3 Touch LCD 3.5
-  min_version: 2026.7.0
-
-logger:
-  level: ${log_level}
 
 debug:
 
@@ -67,16 +58,6 @@ remote_transmitter:
     carrier_duty_percent: 50%
     non_blocking: true
     id: ir_transmitter
-
-#=============================================================
-# Hardware LED Status - Placeholder
-#=============================================================
-# We don't have a typical LED status in this hardware, so we need the fallback status light to be a global to allow for the typical behaviour of the main yaml.
-
-globals:
-  - id: hardware_led_target_state
-    type: std::string
-    initial_value: '"OFF"'
 
 # I2C bus configuration
 i2c:

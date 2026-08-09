@@ -1,0 +1,11 @@
+#===========================================
+# Climate At Home - Mitsubishi Climate Profile
+#===========================================
+#
+# Package path:
+# projects/climate-at-home/packages/climate/platforms/mitsubishi.yaml
+
+substitutions:
+  ac_platform: 'mitsubishi'
+  climate_supports_heat: 'false'
+  climate_supports_fan_only: 'true'

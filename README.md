@@ -1,7 +1,8 @@
 # ESP32 Projects
 
-This repository contains my personal miscellaneous ESP32 or ESPHome projects that may or may not contain unfinished thoughts or ideas that I had.
-I try to make sure that configuration and files will compile and validate.
+This is where I keep my miscellaneous ESP32 and ESPHome projects, including a few
+unfinished thoughts and ideas. I still try to keep the configurations compiling and
+validating.
 
 Contributions, pull requests, and improvement suggestions are welcome.
 
@@ -9,23 +10,22 @@ Contributions, pull requests, and improvement suggestions are welcome.
 
 ### Climate at Home
 
-A local-first ESPHome climate controller and touch-remote project for infrared air conditioners and heat pumps.
-This project is built around the ESPHome climate component, with some added automations built into ESPHome without relying on complex Home Assistant Automations.
+A local-first ESPHome climate controller and touch-remote project for infrared air
+conditioners and heat pumps. It uses ESPHome's climate component and a few onboard
+automations without relying on complicated Home Assistant automations.
 
 - [Project Readme](projects/climate-at-home/README.md)
 - [YAML Examples](projects/climate-at-home/examples/)
 
-Additional ESP32 projects will be added under `projects/secret-magical-project-name/` with _(hopefully)_ their own documentation, packages, examples, tests,
-and maybe if I get my act together architecture thoughts and decisions.
-Please note that I generally talk to myself in the comments, so yeah. There is that too.
-
-## Repository structure
-
-- Project tests should be _(if required)_ located within each project under `projects/secret-magical-project-name/tests/`.
+More ESP32 projects will eventually turn up under
+`projects/secret-magical-project-name/` with _(hopefully)_ their own documentation,
+packages, examples, tests, and maybe, if I get my act together, architecture notes.
+I generally talk to myself in the comments. So yeah. There is that too.
 
 ## Development
 
-The repository uses a pinned ESPHome image in `compose.yaml` for local testing of ESPHome configuration files and validation. GitHub Actions should use the same version.
+Local testing uses the ESPHome version pinned in `compose.yaml`.
+GitHub Actions should use the same version.
 
 Starting the ESPHome dashboard:
 

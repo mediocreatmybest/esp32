@@ -1,0 +1,41 @@
+#===========================================
+# Climate At Home - Shared Device Settings
+#===========================================
+#
+# Package path:
+# projects/climate-at-home/packages/base/device.yaml
+
+substitutions:
+  # Base Device Info
+  name: 'ClimateAtHome'
+  friendly_name: 'Climate At Home'
+  room: ''
+  device_description: 'Climate at Home'
+
+  # Project Info
+  project_name: 'Climate at Home'
+  project_version: 'v0.2.1'
+
+  # Logging
+  log_level: 'INFO'
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: ${device_description}
+  area: ${room}
+  name_add_mac_suffix: true
+  min_version: 2026.7.0
+  project:
+    name: '${project_name}.${hardware_description}'
+    version: ${project_version}
+
+ota:
+  - platform: esphome
+    id: ota_update
+
+logger:
+  level: ${log_level}
+
+mdns:
+  disabled: false

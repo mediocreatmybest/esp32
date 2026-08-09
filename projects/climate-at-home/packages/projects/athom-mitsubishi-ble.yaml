@@ -1,0 +1,10 @@
+#========================================================
+# Climate At Home - Athom Mitsubishi and Bluetooth Project
+#========================================================
+#
+# Package path:
+# projects/climate-at-home/packages/projects/athom-mitsubishi-ble.yaml
+
+packages:
+  athom_mitsubishi: !include athom-mitsubishi.yaml
+  athom_bluetooth_proxy: !include ../features/athom-bluetooth-proxy.yaml

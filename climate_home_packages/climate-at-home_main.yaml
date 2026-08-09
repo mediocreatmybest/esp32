@@ -7,5 +7,7 @@
 # compatibility period.
 
 packages:
+  device_base:
+    !include ../projects/climate-at-home/packages/base/device.yaml
   climate_at_home_legacy_main:
     !include ../projects/climate-at-home/packages/legacy/climate-at-home-main.yaml

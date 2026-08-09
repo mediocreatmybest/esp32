@@ -2,22 +2,12 @@
 # Climate At Home - Legacy Combined Climate Template
 #===========================================
 #
-# This file preserves the current combined climate behaviour while the climate core, timer, anti-mould and common services are migrated into packages.
+# This file preserves the current combined climate behaviour while the climate core,
+# timer and anti-mould behaviour are migrated into packages. Shared device settings live
+# in `packages/base/device.yaml`.
 
 substitutions:
-  # Base Device Info
-  name: 'ClimateAtHome'
-  friendly_name: 'Climate At Home'
   device_type_suffix: 'AC' # e.g. "AC", "HeatPump", "Heater", "Fan", etc.
-  room: ''
-  device_description: 'Climate at Home'
-
-  # Project Info
-  project_name: 'Climate at Home'
-  project_version: 'v0.2.1'
-
-  # Logging
-  log_level: 'INFO'
   # Adding a fallback status for devices that do not have a dedicated status LED.
   hardware_status_led: hardware_status_led_fallback
 
@@ -29,16 +19,6 @@ substitutions:
   climate_supports_fan_only: 'true'
 
 esphome:
-  name: ${name}
-  friendly_name: ${friendly_name}
-  comment: ${device_description}
-  area: ${room}
-  name_add_mac_suffix: true
-  min_version: 2026.5.1
-  project:
-    name: '${project_name}.${hardware_description}'
-    version: ${project_version}
-
   # Add grace period for global
   # https://esphome.io/components/esphome/#on_boot
   on_boot:
@@ -48,16 +28,6 @@ esphome:
         - globals.set:
             id: boot_grace_period
             value: 'false'
-
-ota:
-  - platform: esphome
-    id: ota_update
-
-logger:
-  level: ${log_level}
-
-mdns:
-  disabled: false
 
 #===========================================
 # Climate Definitions - Base settings.
@@ -191,6 +161,10 @@ globals:
   - id: is_drying_down
     type: bool
     initial_value: 'false'
+  # Retained for the combined compatibility package.
+  - id: hardware_led_target_state
+    type: std::string
+    initial_value: '"OFF"'
 
 #===========================================================
 # Fallback Status LED for hardware without a dedicated LED.

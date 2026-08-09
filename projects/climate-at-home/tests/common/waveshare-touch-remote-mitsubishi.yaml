@@ -81,9 +81,6 @@ wifi:
 api:
   reboot_timeout: 0s
 
-ota:
-  - platform: esphome
-
 # Keep the display enabled after boot for the test configuration.
 light:
   - id: !extend display_backlight

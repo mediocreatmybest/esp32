@@ -1,0 +1,35 @@
+#===========================================
+# Climate At Home - Shared Climate State
+#===========================================
+#
+# Package path:
+# projects/climate-at-home/packages/climate/runtime-state.yaml
+
+globals:
+  # We need to add a grace period on boot to prevent false start of triggers.
+  - id: boot_grace_period
+    type: bool
+    initial_value: 'true'
+  # We need to track if this is an internal action or an external user action.
+  - id: internal_action
+    type: bool
+    initial_value: 'false'
+  # The status indicator also needs this while the anti-mould package is running.
+  - id: is_drying_down
+    type: bool
+    initial_value: 'false'
+  # Climate behaviour publishes this. The selected indicator package decides what it means.
+  - id: climate_status_target
+    type: std::string
+    initial_value: '"OFF"'
+
+esphome:
+  # Add a little grace period so boot state does not kick off dry down immediately.
+  # https://esphome.io/components/esphome/#on_boot
+  on_boot:
+    - priority: -100
+      then:
+        - delay: 15s
+        - globals.set:
+            id: boot_grace_period
+            value: 'false'
