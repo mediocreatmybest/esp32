@@ -16,8 +16,8 @@ This directory contains the ESPHome YAML packages used by Climate at Home.
 The old combined climate configuration stays under `legacy/` for remote compatibility.
 `display/` is still planned as that work is split up.
 
-The supported local configurations import one manifest from `projects/`. Maintained
-examples still compose packages directly until remote consumer tests are in place.
+Supported local configurations and development examples import one manifest from
+`projects/`.
 
 The root `climate_home_packages/` directory contains compatibility wrappers for my
 existing remote installs. They will remain for at least one published release after the

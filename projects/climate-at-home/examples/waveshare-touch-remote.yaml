@@ -46,12 +46,11 @@ packages:
   # Climate at Home packages / Hardware / Wi-Fi
   climate_at_home:
     url: https://github.com/mediocreatmybest/esp32
-    ref: main
+    # Development example for the new package layout. Use an immutable release tag once available.
+    ref: dev
     refresh: 0d
     files:
-      # - projects/climate-at-home/packages/legacy/climate-at-home-main.yaml # We can omit this if we are already using the climate at home package on the target device.
-      - projects/climate-at-home/packages/hardware/waveshare-esp32-s3-touch-lcd-3-5.yaml
-      - projects/climate-at-home/packages/features/wifi-diagnostics.yaml
+      - projects/climate-at-home/packages/projects/waveshare-touch-remote.yaml
 
   # Building with the external modular LVGL buttons interface
   modular_lvgl:
@@ -101,13 +100,6 @@ wifi:
 
 api:
   reboot_timeout: 0s
-
-#=============================================================
-# Over-the-Air Updates
-#=============================================================
-
-ota:
-  - platform: esphome
 
 #=============================================================
 # Backlight override / ALWAYS_OFF / ALWAYS_ON

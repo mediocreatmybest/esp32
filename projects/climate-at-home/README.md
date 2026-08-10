@@ -28,9 +28,9 @@ Hardware and optional connectivity now have their own packages. The climate core
 timers, and mould reduction now have their own packages as well.
 
 The timer and mould-reduction packages can be left out of a build. Project manifests
-compose the supported local builds; the old combined package remains for compatibility.
-Public examples still compose packages directly until remote consumer tests are in
-place.
+compose the supported local builds and development examples; the old combined package
+remains for compatibility. The examples use `dev` until an immutable release tag is
+available.
 
 Climate packages publish a shared `OFF`, `ON`, or `DRY_DOWN` status. A selected adapter
 turns that into an Athom LED, a future display indicator, or nothing at all.

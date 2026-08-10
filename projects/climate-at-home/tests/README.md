@@ -7,7 +7,7 @@ The test layout separates shared device settings from the package paths being te
 | `common/`        | Shared substitutions, credentials, external dependencies and device overrides                         |
 | `local/`         | Supported project manifests used for current local build development                                  |
 | `compatibility/` | Previous root package paths retained for my existing remote installs, this will eventually be removed |
-| `remote/`        | Planned clean-cache tests of Git packages                                                             |
+| `remote/`        | Clean remote Git package tests, run against a pushed branch, commit, or release                       |
 
 Files in `common/` are included by another test entry point and are not validated directly.
 
@@ -29,6 +29,10 @@ docker compose run --rm --no-deps esphome config projects/climate-at-home/tests/
 When changing shared packages or package composition, repeat that command for each entry
 point under `local/` and `compatibility/`. GitHub Actions compiles the complete supported
 matrix.
+
+Remote tests are separate because they cannot validate unpushed changes. Their
+`climate_at_home_ref` substitution defaults to `dev` and can be replaced with a pushed
+commit or release tag.
 
 ## Known warnings
 
