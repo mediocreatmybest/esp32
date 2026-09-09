@@ -29,7 +29,7 @@ jobs:
     name: Build Climate at Home
 
     # Use a pinned commit from the ESPHome workflows repository.
-    uses: esphome/workflows/.github/workflows/build.yml@9f6577fd37b5cf773ab1b9be929714a0dcd15661
+    uses: esphome/workflows/.github/workflows/build.yml@0fdd5e311b7e744069166696072a1a9cbc5fbeb6
 
     with:
       files: |
