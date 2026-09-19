@@ -30,7 +30,7 @@ jobs:
     container: esphome/esphome:2026.7.2
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Compile canonical and legacy compositions
         run: |
           for file in \
@@ -55,7 +55,7 @@ jobs:
     container: esphome/esphome:2026.7.2
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate independent layers and legacy BLE composition
         run: |
           for file in \
