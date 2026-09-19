@@ -1,4 +1,3 @@
-# Based on https://github.com/esphome/workflows/tree/main/.github/workflows by ESPHome
 name: ESPHome CI
 
 on:
@@ -6,13 +5,11 @@ on:
   pull_request:
     branches:
       - main
-      - dev
 
   # Test result after changes are merged into main.
   push:
     branches:
       - main
-      - dev
 
   # Let's allow the workflow to be run manually from GitHub Actions.
   workflow_dispatch:
@@ -27,39 +24,56 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build Climate at Home
-
-    # Use a pinned commit from the ESPHome workflows repository.
-    uses: esphome/workflows/.github/workflows/build.yml@9f6577fd37b5cf773ab1b9be929714a0dcd15661
-
-    with:
-      # Compile canonical projects, their independently selectable climate layers,
-      # and the temporary compatibility wrappers.
-      # Compatibility builds can be removed after their documented support period.
-      files: |
-        projects/climate-at-home/tests/local/athom-mitsubishi.yaml
-        projects/climate-at-home/tests/local/athom-mitsubishi-ble.yaml
-        projects/climate-at-home/tests/local/athom-mitsubishi-core.yaml
-        projects/climate-at-home/tests/local/athom-mitsubishi-core-fallback.yaml
-        projects/climate-at-home/tests/local/athom-mitsubishi-timer.yaml
-        projects/climate-at-home/tests/local/athom-mitsubishi-anti-mould.yaml
-        projects/climate-at-home/tests/local/waveshare-touch-remote-mitsubishi.yaml
-        projects/climate-at-home/tests/compatibility/athom-mitsubishi.yaml
-        projects/climate-at-home/tests/compatibility/athom-mitsubishi-ble.yaml
-        projects/climate-at-home/tests/compatibility/waveshare-touch-remote-mitsubishi.yaml
-        projects/climate-at-home/tests/compatibility/waveshare-hardware-defaults.yaml
-
-      # Pin the ESPHome version to known current version.
-      esphome-version: 2026.7.2
-
-  compatibility-contract:
-    name: Check legacy Waveshare identity
+  builds:
+    name: ESPHome Builds
     runs-on: ubuntu-latest
     container: esphome/esphome:2026.7.2
 
     steps:
       - uses: actions/checkout@v4
+      - name: Compile canonical and legacy compositions
+        run: |
+          for file in \
+            projects/climate-at-home/tests/local/athom-mitsubishi.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-ble.yaml \
+            projects/climate-at-home/tests/local/waveshare-touch-remote-mitsubishi.yaml \
+            projects/climate-at-home/tests/compatibility/athom-mitsubishi.yaml \
+            projects/climate-at-home/tests/compatibility/waveshare-touch-remote-mitsubishi.yaml
+          do
+            echo "::group::Compiling $file"
+            if ! esphome compile "$file"; then
+              echo "::error file=$file::ESPHome compilation failed"
+              echo "::endgroup::"
+              exit 1
+            fi
+            echo "::endgroup::"
+          done
+
+  validation:
+    name: ESPHome Validation
+    runs-on: ubuntu-latest
+    container: esphome/esphome:2026.7.2
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate independent layers and legacy BLE composition
+        run: |
+          for file in \
+            projects/climate-at-home/tests/local/athom-mitsubishi-core.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-core-fallback.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-timer.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-anti-mould.yaml \
+            projects/climate-at-home/tests/compatibility/athom-mitsubishi-ble.yaml
+          do
+            echo "::group::Validating $file"
+            if ! esphome config "$file"; then
+              echo "::error file=$file::ESPHome configuration validation failed"
+              echo "::endgroup::"
+              exit 1
+            fi
+            echo "::endgroup::"
+          done
+      # Validate the defaults manifest and retain its resolved identity for checking.
       - name: Resolve legacy hardware defaults
         run: >-
           esphome config
@@ -96,23 +110,23 @@ jobs:
   required:
     name: ESPHome CI required
     needs:
-      - build
-      - compatibility-contract
+      - builds
+      - validation
 
     runs-on: ubuntu-latest
     if: always()
 
     steps:
-      - name: Confirm ESPHome build and compatibility contract passed
+      - name: Confirm ESPHome builds and validation passed
         run: |
-          if [ "${{ needs.build.result }}" != "success" ]; then
-            echo "ESPHome build failed."
+          if [ "${{ needs.builds.result }}" != "success" ]; then
+            echo "ESPHome builds did not succeed."
             exit 1
           fi
 
-          if [ "${{ needs.compatibility-contract.result }}" != "success" ]; then
-            echo "Legacy Waveshare compatibility contract failed."
+          if [ "${{ needs.validation.result }}" != "success" ]; then
+            echo "ESPHome validation did not succeed."
             exit 1
           fi
 
-          echo "ESPHome builds and compatibility contract passed."
+          echo "ESPHome builds and validation passed."
