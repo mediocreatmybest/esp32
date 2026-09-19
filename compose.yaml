@@ -1,5 +1,4 @@
-# Shared ESPHome dev environment
-# Keeping this image version aligned with `.github/workflows/esphome-ci.yml`.
+# Canonical ESPHome image definition used locally and by CI.
 name: esp32-development
 
 services:

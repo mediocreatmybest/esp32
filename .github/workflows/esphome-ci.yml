@@ -27,10 +27,13 @@ jobs:
   builds:
     name: ESPHome Builds
     runs-on: ubuntu-latest
-    container: esphome/esphome:2026.7.2
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate Compose and show ESPHome image
+        run: |
+          docker compose config --quiet
+          docker compose config --images
       - name: Compile canonical and legacy compositions
         run: |
           for file in \
@@ -41,7 +44,7 @@ jobs:
             projects/climate-at-home/tests/compatibility/waveshare-touch-remote-mitsubishi.yaml
           do
             echo "::group::Compiling $file"
-            if ! esphome compile "$file"; then
+            if ! docker compose run --rm --no-deps -T esphome compile "$file"; then
               echo "::error file=$file::ESPHome compilation failed"
               echo "::endgroup::"
               exit 1
@@ -52,10 +55,15 @@ jobs:
   validation:
     name: ESPHome Validation
     runs-on: ubuntu-latest
-    container: esphome/esphome:2026.7.2
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate Compose and show ESPHome image
+        run: |
+          docker compose config --quiet
+          docker compose config --images
+          # Keep the resolved-config directory writable by the runner.
+          mkdir -p .esphome
       - name: Validate independent layers and legacy BLE composition
         run: |
           for file in \
@@ -66,7 +74,7 @@ jobs:
             projects/climate-at-home/tests/compatibility/athom-mitsubishi-ble.yaml
           do
             echo "::group::Validating $file"
-            if ! esphome config "$file"; then
+            if ! docker compose run --rm --no-deps -T esphome config "$file"; then
               echo "::error file=$file::ESPHome configuration validation failed"
               echo "::endgroup::"
               exit 1
@@ -75,20 +83,21 @@ jobs:
           done
       # Validate the defaults manifest and retain its resolved identity for checking.
       - name: Resolve legacy hardware defaults
-        run: >-
-          esphome config
-          projects/climate-at-home/tests/compatibility/waveshare-hardware-defaults.yaml
-          > /tmp/waveshare-hardware-defaults-resolved.yaml
+        run: |
+          mkdir -p .esphome
+          docker compose run --rm --no-deps -T esphome config \
+            projects/climate-at-home/tests/compatibility/waveshare-hardware-defaults.yaml \
+            > .esphome/waveshare-hardware-defaults-resolved.yaml
       - name: Verify legacy identity contract
         run: |
-          python3 - <<'PY'
+          docker compose run --rm --no-deps -T --entrypoint python3 esphome - <<'PY'
           from pathlib import Path
           import re
           import sys
           import yaml
 
           # BaseLoader handles ESPHome tags and reads all scalar values as strings.
-          output = Path("/tmp/waveshare-hardware-defaults-resolved.yaml").read_text()
+          output = Path(".esphome/waveshare-hardware-defaults-resolved.yaml").read_text()
           output = re.sub(r"\x1b\[[0-9;]*m", "", output)
           resolved = yaml.load(output, Loader=yaml.BaseLoader)["esphome"]
           expected = {
