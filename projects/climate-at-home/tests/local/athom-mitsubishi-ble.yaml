@@ -1,0 +1,10 @@
+################################################################################
+# Climate at Home - Canonical Athom Mitsubishi and Bluetooth Package Test
+################################################################################
+
+packages:
+  athom_mitsubishi_ble_project:
+    !include ../../packages/projects/athom-mitsubishi-ble.yaml
+
+  test_configuration:
+    !include ../common/athom-mitsubishi.yaml

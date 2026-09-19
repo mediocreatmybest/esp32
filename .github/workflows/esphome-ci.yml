@@ -1,4 +1,3 @@
-# Based on https://github.com/esphome/workflows/tree/main/.github/workflows by ESPHome
 name: ESPHome CI
 
 on:
@@ -25,36 +24,109 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build Climate at Home
+  builds:
+    name: ESPHome Builds
+    runs-on: ubuntu-latest
+    container: esphome/esphome:2026.7.2
 
-    # Use a pinned commit from the ESPHome workflows repository.
-    uses: esphome/workflows/.github/workflows/build.yml@0fdd5e311b7e744069166696072a1a9cbc5fbeb6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile canonical and legacy compositions
+        run: |
+          for file in \
+            projects/climate-at-home/tests/local/athom-mitsubishi.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-ble.yaml \
+            projects/climate-at-home/tests/local/waveshare-touch-remote-mitsubishi.yaml \
+            projects/climate-at-home/tests/compatibility/athom-mitsubishi.yaml \
+            projects/climate-at-home/tests/compatibility/waveshare-touch-remote-mitsubishi.yaml
+          do
+            echo "::group::Compiling $file"
+            if ! esphome compile "$file"; then
+              echo "::error file=$file::ESPHome compilation failed"
+              echo "::endgroup::"
+              exit 1
+            fi
+            echo "::endgroup::"
+          done
 
-    with:
-      files: |
-        tests/athom-mitsubishi.yaml
-        tests/athom-mitsubishi_ble.yaml
-        tests/waveshare_touch_remote_mitsubishi.yaml
+  validation:
+    name: ESPHome Validation
+    runs-on: ubuntu-latest
+    container: esphome/esphome:2026.7.2
 
-      # Pin the ESPHome version to known current version.
-      esphome-version: 2026.7.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate independent layers and legacy BLE composition
+        run: |
+          for file in \
+            projects/climate-at-home/tests/local/athom-mitsubishi-core.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-core-fallback.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-timer.yaml \
+            projects/climate-at-home/tests/local/athom-mitsubishi-anti-mould.yaml \
+            projects/climate-at-home/tests/compatibility/athom-mitsubishi-ble.yaml
+          do
+            echo "::group::Validating $file"
+            if ! esphome config "$file"; then
+              echo "::error file=$file::ESPHome configuration validation failed"
+              echo "::endgroup::"
+              exit 1
+            fi
+            echo "::endgroup::"
+          done
+      # Validate the defaults manifest and retain its resolved identity for checking.
+      - name: Resolve legacy hardware defaults
+        run: >-
+          esphome config
+          projects/climate-at-home/tests/compatibility/waveshare-hardware-defaults.yaml
+          > /tmp/waveshare-hardware-defaults-resolved.yaml
+      - name: Verify legacy identity contract
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+          import yaml
 
+          # BaseLoader handles ESPHome tags and reads all scalar values as strings.
+          output = Path("/tmp/waveshare-hardware-defaults-resolved.yaml").read_text()
+          output = re.sub(r"\x1b\[[0-9;]*m", "", output)
+          resolved = yaml.load(output, Loader=yaml.BaseLoader)["esphome"]
+          expected = {
+              "name": "waveshare-esp32-s3-touch-35",
+              "friendly_name": "WaveShare ESP32-S3 Touch LCD 3.5",
+              "name_add_mac_suffix": "false",
+          }
+          failed = False
+          for key, value in expected.items():
+              actual = resolved.get(key)
+              if actual != value:
+                  print(f"Legacy Waveshare {key}: expected {value!r}, got {actual!r}")
+                  failed = True
+          if failed:
+              sys.exit(1)
+          print("Legacy Waveshare identity contract passed.")
+          PY
 
   required:
     name: ESPHome CI required
     needs:
-      - build
+      - builds
+      - validation
 
     runs-on: ubuntu-latest
     if: always()
 
     steps:
-      - name: Confirm ESPHome build passed
+      - name: Confirm ESPHome builds and validation passed
         run: |
-          if [ "${{ needs.build.result }}" != "success" ]; then
-            echo "ESPHome build failed."
+          if [ "${{ needs.builds.result }}" != "success" ]; then
+            echo "ESPHome builds did not succeed."
             exit 1
           fi
 
-          echo "ESPHome YAML configuration compiled successfully."
+          if [ "${{ needs.validation.result }}" != "success" ]; then
+            echo "ESPHome validation did not succeed."
+            exit 1
+          fi
+
+          echo "ESPHome builds and validation passed."

@@ -1,0 +1,9 @@
+# Validate the legacy hardware wrapper without overriding its device identity.
+packages:
+  waveshare_s3_touch_hardware:
+    !include ../../../../climate_home_packages/waveshare-esp32-s3-touch-lcd-3-5_hardware.yaml
+
+# The wrapper includes ESPHome OTA, which requires a network component.
+wifi:
+  ssid: 'ci-test-network'
+  password: 'ci-test-password'

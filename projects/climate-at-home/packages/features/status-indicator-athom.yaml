@@ -1,0 +1,33 @@
+#===========================================
+# Climate At Home - Athom Status Indicator
+#===========================================
+#
+# Package path:
+# projects/climate-at-home/packages/features/status-indicator-athom.yaml
+
+# The climate packages only publish `climate_status_target`. This adapter knows about
+# the Athom LED and turns that status into something visible.
+script:
+  - id: climate_status_indicator_update
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return id(climate_status_target) == "ON";'
+          then:
+            - light.turn_on:
+                id: athom_status_led
+                effect: 'None'
+                brightness: 100%
+      - if:
+          condition:
+            lambda: 'return id(climate_status_target) == "DRY_DOWN";'
+          then:
+            - light.turn_on:
+                id: athom_status_led
+                effect: 'Dry Down Status'
+      - if:
+          condition:
+            lambda: 'return id(climate_status_target) == "OFF";'
+          then:
+            - light.turn_off: athom_status_led

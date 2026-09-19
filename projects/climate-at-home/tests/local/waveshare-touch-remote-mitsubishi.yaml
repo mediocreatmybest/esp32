@@ -1,0 +1,10 @@
+################################################################################
+# Climate at Home - Canonical Waveshare Touch Remote Package Test
+################################################################################
+
+packages:
+  waveshare_touch_remote_project:
+    !include ../../packages/projects/waveshare-touch-remote.yaml
+
+  test_configuration:
+    !include ../common/waveshare-touch-remote-mitsubishi.yaml

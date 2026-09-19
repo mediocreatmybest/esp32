@@ -1,0 +1,13 @@
+################################################################################
+# Climate at Home - Canonical Athom Mitsubishi Core No-op Indicator Test
+################################################################################
+
+packages:
+  device_base: !include ../../packages/base/device.yaml
+  athom_rf_ir_hardware: !include ../../packages/hardware/athom-rf-ir-remote.yaml
+  mitsubishi_climate_profile: !include ../../packages/climate/platforms/mitsubishi.yaml
+  climate_runtime_state: !include ../../packages/climate/runtime-state.yaml
+  climate_core: !include ../../packages/climate/core.yaml
+  no_status_indicator: !include ../../packages/features/status-indicator-fallback.yaml
+  wifi_diagnostics: !include ../../packages/features/wifi-diagnostics.yaml
+  test_configuration: !include ../common/athom-mitsubishi.yaml

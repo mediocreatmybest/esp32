@@ -1,0 +1,45 @@
+#===========================================
+# Climate At Home - Climate Core
+#===========================================
+#
+# Package path:
+# projects/climate-at-home/packages/climate/core.yaml
+
+substitutions:
+  device_type_suffix: 'AC' # e.g. "AC", "HeatPump", "Heater", "Fan", etc.
+
+climate:
+  - platform: ${ac_platform}
+    id: primary_ac
+    transmitter_id: ir_transmitter
+    receiver_id: ir_receiver
+    name: '${name}-${device_type_suffix}'
+    supports_heat: ${climate_supports_heat}
+    icon: 'mdi:air-conditioner'
+    on_state:
+      # Publish a normal running state. The selected indicator handles the hardware.
+      - if:
+          condition:
+            and:
+              - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return !id(is_drying_down);'
+          then:
+            - globals.set:
+                id: climate_status_target
+                value: '"ON"'
+            - script.execute: climate_status_indicator_update
+
+      - if:
+          condition:
+            lambda: 'return id(primary_ac).mode == climate::CLIMATE_MODE_OFF;'
+          then:
+            - globals.set:
+                id: climate_status_target
+                value: '"OFF"'
+            - script.execute: climate_status_indicator_update
+
+binary_sensor:
+  - platform: status
+    name: 'Status'
+    id: system_status
+    entity_category: 'diagnostic'

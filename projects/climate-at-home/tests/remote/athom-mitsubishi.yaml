@@ -1,0 +1,18 @@
+################################################################################
+# Climate at Home - Remote Athom Mitsubishi Package Test
+################################################################################
+
+substitutions:
+  # Override this with a pushed commit or release tag when required.
+  climate_at_home_ref: dev
+
+packages:
+  climate_at_home:
+    url: https://github.com/mediocreatmybest/esp32
+    ref: ${climate_at_home_ref}
+    refresh: 0d
+    files:
+      - projects/climate-at-home/packages/projects/athom-mitsubishi.yaml
+
+  test_configuration:
+    !include ../common/athom-mitsubishi.yaml

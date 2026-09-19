@@ -1,0 +1,15 @@
+################################################################################
+# Climate at Home - Legacy Waveshare Touch Remote Package Path Test
+################################################################################
+#
+# These root package paths are public compatibility contracts during migration.
+
+packages:
+  waveshare_s3_touch_hardware:
+    !include ../../../../climate_home_packages/waveshare-esp32-s3-touch-lcd-3-5_hardware.yaml
+
+  wifi_diagnostics:
+    !include ../../../../climate_home_packages/climate-at-home_wifi.yaml
+
+  test_configuration:
+    !include ../common/waveshare-touch-remote-mitsubishi.yaml

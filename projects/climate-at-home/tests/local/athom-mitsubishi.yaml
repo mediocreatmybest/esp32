@@ -1,0 +1,10 @@
+################################################################################
+# Climate at Home - Canonical Athom Mitsubishi Package Test
+################################################################################
+
+packages:
+  athom_mitsubishi_project:
+    !include ../../packages/projects/athom-mitsubishi.yaml
+
+  test_configuration:
+    !include ../common/athom-mitsubishi.yaml

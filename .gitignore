@@ -1,0 +1,7 @@
+.esphome/
+.venv/
+.vscode/
+*.pyc
+.device-builder*
+.receiver_peers.json
+.offloader_pairings.json

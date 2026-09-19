@@ -1,0 +1,17 @@
+#===========================================
+# Climate At Home - Athom Mitsubishi Project
+#===========================================
+#
+# Package path:
+# projects/climate-at-home/packages/projects/athom-mitsubishi.yaml
+
+packages:
+  device_base: !include ../base/device.yaml
+  athom_rf_ir_hardware: !include ../hardware/athom-rf-ir-remote.yaml
+  mitsubishi_climate_profile: !include ../climate/platforms/mitsubishi.yaml
+  climate_runtime_state: !include ../climate/runtime-state.yaml
+  climate_core: !include ../climate/core.yaml
+  climate_auto_timer: !include ../climate/auto-timer.yaml
+  climate_anti_mould: !include ../climate/anti-mould.yaml
+  athom_status_indicator: !include ../features/status-indicator-athom.yaml
+  wifi_diagnostics: !include ../features/wifi-diagnostics.yaml
