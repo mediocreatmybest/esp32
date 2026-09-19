@@ -5,6 +5,11 @@
 # Existing remote consumers use this path. New project configurations should use:
 # projects/climate-at-home/packages/hardware/waveshare-esp32-s3-touch-lcd-3-5.yaml
 
+substitutions:
+  name: 'waveshare-esp32-s3-touch-35'
+  friendly_name: 'WaveShare ESP32-S3 Touch LCD 3.5'
+  name_add_mac_suffix: 'false'
+
 packages:
   device_base:
     !include ../projects/climate-at-home/packages/base/device.yaml

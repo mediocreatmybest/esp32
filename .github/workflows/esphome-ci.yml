@@ -48,24 +48,71 @@ jobs:
         projects/climate-at-home/tests/compatibility/athom-mitsubishi.yaml
         projects/climate-at-home/tests/compatibility/athom-mitsubishi-ble.yaml
         projects/climate-at-home/tests/compatibility/waveshare-touch-remote-mitsubishi.yaml
+        projects/climate-at-home/tests/compatibility/waveshare-hardware-defaults.yaml
 
       # Pin the ESPHome version to known current version.
       esphome-version: 2026.7.2
+
+  compatibility-contract:
+    name: Check legacy Waveshare identity
+    runs-on: ubuntu-latest
+    container: esphome/esphome:2026.7.2
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve legacy hardware defaults
+        run: >-
+          esphome config
+          projects/climate-at-home/tests/compatibility/waveshare-hardware-defaults.yaml
+          > /tmp/waveshare-hardware-defaults-resolved.yaml
+      - name: Verify legacy identity contract
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+          import yaml
+
+          # BaseLoader handles ESPHome tags and reads all scalar values as strings.
+          output = Path("/tmp/waveshare-hardware-defaults-resolved.yaml").read_text()
+          output = re.sub(r"\x1b\[[0-9;]*m", "", output)
+          resolved = yaml.load(output, Loader=yaml.BaseLoader)["esphome"]
+          expected = {
+              "name": "waveshare-esp32-s3-touch-35",
+              "friendly_name": "WaveShare ESP32-S3 Touch LCD 3.5",
+              "name_add_mac_suffix": "false",
+          }
+          failed = False
+          for key, value in expected.items():
+              actual = resolved.get(key)
+              if actual != value:
+                  print(f"Legacy Waveshare {key}: expected {value!r}, got {actual!r}")
+                  failed = True
+          if failed:
+              sys.exit(1)
+          print("Legacy Waveshare identity contract passed.")
+          PY
 
   required:
     name: ESPHome CI required
     needs:
       - build
+      - compatibility-contract
 
     runs-on: ubuntu-latest
     if: always()
 
     steps:
-      - name: Confirm ESPHome build passed
+      - name: Confirm ESPHome build and compatibility contract passed
         run: |
           if [ "${{ needs.build.result }}" != "success" ]; then
             echo "ESPHome build failed."
             exit 1
           fi
 
-          echo "ESPHome YAML configuration compiled successfully."
+          if [ "${{ needs.compatibility-contract.result }}" != "success" ]; then
+            echo "Legacy Waveshare compatibility contract failed."
+            exit 1
+          fi
+
+          echo "ESPHome builds and compatibility contract passed."

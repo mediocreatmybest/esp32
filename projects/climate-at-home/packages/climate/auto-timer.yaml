@@ -70,7 +70,9 @@ script:
       - delay: !lambda 'return id(timer_duration).state * 60000;'
       - if:
           condition:
-            lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+            and:
+              - lambda: 'return id(primary_ac).mode != climate::CLIMATE_MODE_OFF;'
+              - lambda: 'return !id(is_drying_down);'
           then:
             - globals.set:
                 id: internal_action

@@ -69,5 +69,5 @@ turns that into an Athom LED, a future display indicator, or nothing at all.
   - `examples/athom-mitsubishi.yaml` is configured for Mitsubishi devices _(as that is what I have)_ and includes Mitsubishi-specific fan settings.
   - More useful device-specific examples would be handy.
 
-- **Anything elsE?**
+- **Anything else?**
   - Feel free to make any suggestions, improvements, or pull requests, etc.

@@ -7,8 +7,9 @@
 
 substitutions:
   # Base Device Info
-  name: 'ClimateAtHome'
-  friendly_name: 'Climate At Home'
+  name: 'climate-at-home'
+  friendly_name: 'Climate at Home'
+  name_add_mac_suffix: 'true'
   room: ''
   device_description: 'Climate at Home'
 
@@ -24,7 +25,7 @@ esphome:
   friendly_name: ${friendly_name}
   comment: ${device_description}
   area: ${room}
-  name_add_mac_suffix: true
+  name_add_mac_suffix: ${name_add_mac_suffix}
   min_version: 2026.7.0
   project:
     name: '${project_name}.${hardware_description}'

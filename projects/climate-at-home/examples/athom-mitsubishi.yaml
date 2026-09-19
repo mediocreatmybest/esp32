@@ -39,7 +39,7 @@ packages:
     ref: dev
     refresh: 0d
     files:
-      - projects/climate-at-home/packages/projects/athom-mitsubishi-ble.yaml
+      - projects/climate-at-home/packages/projects/athom-mitsubishi.yaml
 
 # Defaulting to false to avoid trailing suffix on device names.
 esphome:
