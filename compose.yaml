@@ -3,7 +3,7 @@ name: esp32-development
 
 services:
   esphome:
-    image: esphome/esphome:2026.9.0
+    image: esphome/esphome:2026.9.1
     init: true
     working_dir: /config
     command:
