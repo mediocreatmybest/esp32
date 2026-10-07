@@ -80,7 +80,7 @@ packages:
   # Modular LVGL Buttons override - This should help fix the page transition issues on slow hardware.
   modular_lvgl_overrides:
     url: https://github.com/mediocreatmybest/esp32
-    ref: dev # dev testing
+    ref: main
     refresh: 0d
     files:
       - path: projects/climate-at-home/packages/overrides/modular-lvgl-buttons-climate-page-transitions.yaml
