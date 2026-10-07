@@ -65,6 +65,15 @@ packages:
           icon: $mdi_air_conditioner
           page_id: main_page
 
+  # Exercise the example's transition override against the upstream LVGL widgets.
+  modular_lvgl_overrides:
+    !include
+      file: ../../packages/overrides/modular-lvgl-buttons-climate-page-transitions.yaml
+      vars:
+        # These must match the remote interface above so !extend finds its targets.
+        uid: waveshare_s3_touch_mitsubishi
+        page_id: main_page
+
 # Overrides applied after the packages have been merged.
 esphome:
   name: "${name}"

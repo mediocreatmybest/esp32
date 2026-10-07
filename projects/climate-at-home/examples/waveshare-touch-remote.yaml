@@ -87,6 +87,11 @@ packages:
         vars:
           uid: livingroom_remote_ac # If using the override, this needs to match the UID used in the modular LVGL buttons configuration above.
           page_id: main_page
+    # Multiple overrides are also possible for different pages or different UIDs, just match the UID and page_id as needed.
+    # - path: projects/climate-at-home/packages/overrides/modular-lvgl-buttons-climate-page-transitions.yaml
+    #   vars:
+    #     uid: livingroom_remote_ac # If using the override, this needs to match the UID used in the modular LVGL buttons configuration above.
+    #     page_id: main_page
 
 #=============================================================
 # Device configuration

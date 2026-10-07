@@ -17,6 +17,9 @@ Both `local/` and `compatibility/` cover:
 - Athom with Mitsubishi climate and Bluetooth proxy.
 - Waveshare touch remote with the external modular LVGL interface.
 
+The shared Waveshare configuration also includes the example's local page-transition
+override. Both CI builds exercise its `!extend` merges against the upstream LVGL widgets.
+
 `local/` also validates Athom's climate core with physical and no-op status indicators,
 plus the timer and mould-reduction packages on their own.
 
