@@ -1,0 +1,29 @@
+lvgl:
+  # This should help fix the page transition stuttering on slower hardware.
+  # We just need to keep track of any upstream project changes.
+  pages:
+    # Opening the climate controls.
+    - id: !extend ${page_id}
+      widgets:
+        - container:
+            id: !extend ${uid}_tile
+            widgets:
+              - button:
+                  id: !extend button_${uid}
+                  on_short_click:
+                    then:
+                      - lvgl.page.show:
+                          id: !extend ${uid}_climate_page
+                          animation: NONE
+                          time: 0ms
+
+    # Returning to the main page.
+    - id: !extend ${uid}_climate_page
+      widgets:
+        - button:
+            id: !extend ${uid}_back_corner_btn
+            on_click:
+              - lvgl.page.show:
+                  id: !extend ${page_id}
+                  animation: NONE
+                  time: 0ms
