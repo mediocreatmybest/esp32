@@ -77,13 +77,16 @@ packages:
           icon: $mdi_air_conditioner
           page_id: main_page
 
-  # Modular LVGL Buttons Overide - This should help fix the page transition issues on slow hardware.
+  # Modular LVGL Buttons override - This should help fix the page transition issues on slow hardware.
   modular_lvgl_overrides:
     url: https://github.com/mediocreatmybest/esp32
     ref: dev # dev testing
     refresh: 0d
     files:
-      - projects/climate-at-home/packages/overrides/modular-lvgl-buttons-climate-page-transitions.yaml
+      - path: projects/climate-at-home/packages/overrides/modular-lvgl-buttons-climate-page-transitions.yaml
+        vars:
+          uid: livingroom_remote_ac # If using the override, this needs to match the UID used in the modular LVGL buttons configuration above.
+          page_id: main_page
 
 #=============================================================
 # Device configuration

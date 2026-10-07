@@ -3,27 +3,27 @@ lvgl:
   # We just need to keep track of any upstream project changes.
   pages:
     # Opening the climate controls.
-    - id: !extend main_page
+    - id: !extend ${page_id}
       widgets:
         - container:
-            id: !extend livingroom_remote_ac_tile
+            id: !extend ${uid}_tile
             widgets:
               - button:
-                  id: !extend button_livingroom_remote_ac
+                  id: !extend button_${uid}
                   on_short_click:
                     then:
                       - lvgl.page.show:
-                          id: !extend livingroom_remote_ac_climate_page
+                          id: !extend ${uid}_climate_page
                           animation: NONE
                           time: 0ms
 
     # Returning to the main page.
-    - id: !extend livingroom_remote_ac_climate_page
+    - id: !extend ${uid}_climate_page
       widgets:
         - button:
-            id: !extend livingroom_remote_ac_back_corner_btn
+            id: !extend ${uid}_back_corner_btn
             on_click:
               - lvgl.page.show:
-                  id: !extend main_page
+                  id: !extend ${page_id}
                   animation: NONE
                   time: 0ms
