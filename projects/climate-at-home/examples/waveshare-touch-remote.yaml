@@ -47,7 +47,7 @@ packages:
   climate_at_home:
     url: https://github.com/mediocreatmybest/esp32
     # Development example for the new package layout. Use an immutable release tag once available.
-    ref: dev
+    ref: main
     refresh: 0d
     files:
       - projects/climate-at-home/packages/projects/waveshare-touch-remote.yaml
@@ -76,6 +76,14 @@ packages:
           text: 'Livingroom AC'
           icon: $mdi_air_conditioner
           page_id: main_page
+
+  # Modular LVGL Buttons Overide - This should help fix the page transition issues on slow hardware.
+  modular_lvgl_overrides:
+    url: https://github.com/mediocreatmybest/esp32
+    ref: dev # dev testing
+    refresh: 0d
+    files:
+      - projects/climate-at-home/packages/overrides/modular-lvgl-buttons-climate-page-transitions.yaml
 
 #=============================================================
 # Device configuration
